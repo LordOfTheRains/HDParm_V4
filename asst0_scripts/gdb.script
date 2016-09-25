@@ -1,0 +1,121 @@
+Script started on Thu 01 Sep 2016 09:06:54 PM EDT
+[root@localhost ~]# cd ~cs[K[K/cs161/root/
+[root@localhost root]# cd[Ks a[K[K[K[Kcs [K1[K161-dg[K[Kgdb kernel
+bash: cs161-gdb: command not found
+[root@localhost root]# ls
+[0m[01;34mbin[0m      [01;34mhostinclude[0m  [01;36mhub161[0m       [01;34minclude[0m  [01;32mkernel-ASST0[0m  [01;34mman[0m   [01;36mstat161[0m       [01;36msys161[0m       sys161.conf         [01;34mtestbin[0m   [01;32mtrace161-1.14[0m
+[01;34mhostbin[0m  [01;34mhostlib[0m      [01;32mhub161-1.14[0m  [01;36mkernel[0m   [01;34mlib[0m           [01;34msbin[0m  [01;32mstat161-1.14[0m  [01;32msys161-1.14[0m  sys161.conf.sample  [01;36mtrace161[0m
+[root@localhost root]# cd ..
+[root@localhost cs161]# ls
+[0m[01;34masst0_scripts[0m  [01;34mbin[0m  [01;34mcs161-binutils-1.4[0m  [01;34mcs161-gcc-1.5[0m  [01;34mcs161-gdb-1.5[0m  [01;34mcvsroot[0m  [01;31mos161-1.10.tar.gz[0m  [01;34mroot[0m  [01;34msrc[0m  [01;34msys161-1.14[0m  [01;34mtools[0m
+[root@localhost cs161]# cd[K[Kcat ./[K[K~/[K[K[K[K[K[Kcd
+[root@localhost ~]# cat [K/.[K[K /.bashrc
+cat: /.bashrc: No such file or directory
+[root@localhost ~]# ls
+anaconda-ks.cfg  [0m[01;34mcs161[0m  [01;31mcs161-binutils-1.4.tar[0m  [01;34mcvs_practice[0m  [01;34mproject_1[0m  [01;34mproject_2[0m  project2_9_debug  [01;34mrepo[0m  sys161.conf
+[root@localhost ~]# cd[K[Kcat .[K?[K~/c[K.bashrc [K
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+export CVSROOT=~/cs161/cvsroot
+
+
+
+
+
+
+[root@localhost ~]# cat ~/.bashrc[Kcat ~/.bashrcls[Kcat /.bashrc[C[C[Cls[Kcat /.bashrcls[Kcat ~/.bashrc[Kcat ~/.bashrc[1P ~/.bashrc[1P ~/.bashrc[1P ~/.bashrcv ~/.bashrci ~/.bashrc
+[1;64r[?25h[?8c[?25h[?0c[27m[24m[0m[H[J[?25l[?1c[64;1H"~/.bashrc" 19L, 213C[1;1H# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then[11;9H. /etc/bashrc
+fi
+export CVSROOT=~/cs161/cvsroot[20;1H[1m[34m~                                                                                                                                                               [21;1H~                                                                                                                                                               [22;1H~                                                                                                                                                               [23;1H~                                                                                                                                                               [24;1H~                                                                                                                                                               [25;1H~                                                                                                                                                               [26;1H~                                                                                                                                                               [27;1H~                                                                                                                                                               [28;1H~                                                                                                                                                               [29;1H~                                                                                                                                                               [30;1H~                                                                                                                                                               [31;1H~                                                                                                                                                               [32;1H~                                                                                                                                                               [33;1H~                                                                                                                                                               [34;1H~                                                                                                                                                               [35;1H~                                                                                                                                                               [36;1H~                                                                                                                                                               [37;1H~                                                                                                                                                               [38;1H~                                                                                                                                                               [39;1H~                                                                                                                                                               [40;1H~                                                                                                                                                               [41;1H~                                                                                                                                                               [42;1H~                                                                                                                                                               [43;1H~                                                                                                                                                               [44;1H~                                                                                                                                                               [45;1H~                                                                                                                                                               [46;1H~                                                                                                                                                               [47;1H~                                                                                                                                                               [48;1H~                                                                                                                                                               [49;1H~                                                                                                                                                               [50;1H~                                                                                                                                                               [51;1H~                                                                                                                                                               [52;1H~                                                                                                                                                               [53;1H~                                                                                                                                                               [54;1H~                                                                                                                                                               [55;1H~                                                                                                                                                               [56;1H~                                                                                                                                                               [57;1H~                                                                                                                                                               [58;1H~                                                                                                                                                               [59;1H~                                                                                                                                                               [60;1H~                                                                                                                                                               [61;1H~                                                                                                                                                               [62;1H~                                                                                                                                                               [63;1H~                                                                                                                                                               [1;1H[?25h[?0c
+
+
+
+
+
+
+
+
+[11;8H
+
+
+
+[14;1H[13;1H
+[19;1H[18;1H[17;1H[16;1H[15;1H[14;1H[?25l[?1c[0m[64;1H[1m-- INSERT --[0m[64;13H[K[14;1H[?25h[?0c[?25l[?1cE[?25h[?0c[?25l[?1cX[?25h[?0c[?25l[?1cP[?25h[?0c[?25l[?1cO[?25h[?0c[?25l[?1c[14;4H[K[14;4H[?25h[?0c[?25l[?1c[14;3H[K[14;3H[?25h[?0c[?25l[?1c[14;2H[K[14;2H[?25h[?0c[?25l[?1c[14;1H[K[14;1H[?25h[?0c[?25l[?1ce[?25h[?0c[?25l[?1cx[?25h[?0c[?25l[?1cp[?25h[?0c[?25l[?1co[?25h[?0c[?25l[?1cr[?25h[?0c[?25l[?1ct[?25h[?0c[?25l[?1c [?25h[?0c[?25l[?1cP[?25h[?0c[?25l[?1cA[?25h[?0c[?25l[?1cT[?25h[?0c[?25l[?1cH[?25h[?0c[?25l[?1c=[?25h[?0c[?25l[?1c~[?25h[?0c[?25l[?1c/[?25h[?0c[?25l[?1cc[?25h[?0c[?25l[?1cs[?25h[?0c[?25l[?1c1[?25h[?0c[?25l[?1c6[?25h[?0c[?25l[?1c1[?25h[?0c[?25l[?1c/[?25h[?0c[?25l[?1cb[?25h[?0c[?25l[?1ci[?25h[?0c[?25l[?1cn[?25h[?0c[?25l[?1c:[?25h[?0c[?25l[?1c&[?25h[?0c[?25l[?1c[14;25H[K[14;25H[?25h[?0c[?25l[?1c$[?25h[?0c[?25l[?1c{[?25h[?0c[?25l[?1cA[?25h[?0c[?25l[?1c[14;27H[K[14;27H[?25h[?0c[?25l[?1c[14;26H[K[14;26H[?25h[?0c[?25l[?1cP[?25h[?0c[?25l[?1cA[?25h[?0c[?25l[?1cT[?25h[?0c[?25l[?1cH[?25h[?0c[?25l[?1c[15;63r[15;1H[L[1;64r[15;1H[?25h[?0c[64;1H[K[15;1H[?25l[?1c[?25h[?0c[?25l[?1c[64;1H:[?25h[?0cwq[?25l[?1c".bashrc" 20L, 243C written[?25h[?0c
+[root@localhost ~]# e[Kvi ~/.bashrc[1@cat[C[C[C[C[C[C[C[C[C[Cls[Kcat /.bashrcls[Kcat ~/.bashrc[1Pvi[C[C[C[C[C[C[C[C[C[C[Kcd cs161/root/
+[root@localhost root]# cs-[K161-b[Kgdb kernel
+bash: cs161-gdb: command not found
+[root@localhost root]# export [K[K[K[K[K[K[Kecho $p[KPATH
+/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+[root@localhost root]# echo $PATH[Kexport path [K[K[K[K[KPATH =[K[K= ![K[K~/cs161/bin/:$PATH
+[root@localhost root]# export PATH=~/cs161/bin/:$PATH[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Ccho $PATH[Kcs161-gdb kernel
+GNU gdb 6.6
+Copyright (C) 2006 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "--host=x86_64-unknown-linux-gnu --target=mips-elf"...
+/root/.gdbinit:1: Error in sourced command file:
+simple: No such file or directory.
+(gdb) quit
+[root@localhost root]# cd[K[Kls
+[0m[01;34mbin[0m      [01;34mhostinclude[0m  [01;36mhub161[0m       [01;34minclude[0m  [01;32mkernel-ASST0[0m  [01;34mman[0m   [01;36mstat161[0m       [01;36msys161[0m       sys161.conf         [01;34mtestbin[0m   [01;32mtrace161-1.14[0m
+[01;34mhostbin[0m  [01;34mhostlib[0m      [01;32mhub161-1.14[0m  [01;36mkernel[0m   [01;34mlib[0m           [01;34msbin[0m  [01;32mstat161-1.14[0m  [01;32msys161-1.14[0m  sys161.conf.sample  [01;36mtrace161[0m
+[root@localhost root]# cd r[K[K[K[Kl[Kcd ..
+[root@localhost cs161]# cd r[Kcs161-
+bash: cd: cs161-: No such file or directory
+[root@localhost cs161]# cd c[K[K[K[Kcd root/
+[root@localhost root]# cs161-gdb kernel
+GNU gdb 6.6
+Copyright (C) 2006 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB.  Type "show warranty" for details.
+This GDB was configured as "--host=x86_64-unknown-linux-gnu --target=mips-elf"...
+/root/.gdbinit:1: Error in sourced command file:
+simple: No such file or directory.
+(gdb) target remte[K[Kote unix:.sockets/gdb
+Remote debugging using unix:.sockets/gdb
+__start () at ../../arch/mips/mips/start.S:24
+24	../../arch/mips/mips/start.S: No such file or directory.
+	in ../../arch/mips/mips/start.S
+Current language:  auto; currently asm
+(gdb) break menu
+Breakpoint 1 at 0x8001ba9c: file ../../main/menu.c, line 647.
+(gdb) c
+Continuing.
+
+Breakpoint 1, menu (args=0x8002a334 "") at ../../main/menu.c:647
+647		menu_execute(args, 1);
+Current language:  auto; currently c
+(gdb) where
+#0  menu (args=0x8002a334 "") at ../../main/menu.c:647
+#1  0xffffffff8001a9d4 in kmain (arguments=0x8002a334 "") at ../../main/main.c:163
+#2  0xffffffff8000d278 in __start () at ../../arch/mips/mips/start.S:163
+(gdb) detach
+Ending remote debugging.
+(gdb) quit
+[root@localhost root]# exit
+exit
+
+Script done on Thu 01 Sep 2016 09:15:14 PM EDT

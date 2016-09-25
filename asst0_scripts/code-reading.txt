@@ -1,0 +1,70 @@
+1.	Which register number is used for the stack pointer (sp) in OS/161?
+29
+
+2.	What bus/busses does OS/161 support?
+LAMEbus
+
+3.	What is the difference between splhigh and spl0?
+Splhigh: sets priority high which will disable all interrupts.
+Spl0: sets priority to 0 which will enable all interrupts
+
+4.	Why do we use typedefs like u_int32_t instead of simply saying “int”?
+Different system architectures can have different ways of representing “int”, a more explicit definition such as “u_int32_t removes ambiguity and allows for portability.
+ 
+5.	What does splx return?
+Oldspl
+
+6.	What is the highest interrupt level?
+15
+
+7.	How frequently are hardlock interrupts generated?
+100hz, or 100 times per second
+
+8.	What functions comprise the standard interface to a VFS device?
+fs_setcurdir, vfs_clearcurdir, vfs_getcurdir, vfs_sync, vfs_getroot, vfs_getdevname, vfs_lookup, vfs_lookparent, vfs_open, vfs_close, vfs_readlink, vfs_symlink, vfs_mkdir, vfs_link, vfs_remove, vfs_rmdir, vfs_rename, vfs_chdir, vfs_getcwd, vfs_bootstrap, vfs_initbootfs, vfs_setbootfs, vfs_clearbootfs, vfs_adddev, vfs_addfs, vfs_mount, vfs_unmount, and vfs_unmountall
+
+9.	How many characters are allowed in a volume name?
+32
+
+10.	How many direct blocks does an SFS file have?
+512 bytes
+
+11.	What is the standard interface to a file system (i.e., what functions must you implement to implement a new file system)?
+12.	What function puts a thread to sleep?
+thread_sleep
+
+13.	How large are OS/161 pids?
+4
+
+14.	What operations can you do on a vnode?
+emufs_loadvnode, emufs_open, emufs_opendir, emufs_close, emufs_reclaim, emufs_read, emufs_getdirentry, emufs_write, emufs_ioctl, emufs_stat, emufs_file_gettype, emufs_dir_gettype, emufs_tryseek, emufs_fsync, emufs_truncate, emufs_creat, emufs_lookup, emufs_lookparent, emufs_namefile
+
+15.	What is the max path length in OS/161?
+1024
+
+16.	What is the system call number for a reboot?
+0
+
+17.	Where is STDIN_FILENO defined?
+Kern/include/unistd.h:52
+
+18.	Is it OK to initialize the thread system before the scheduler? Why or why not?
+No. The schedulers handle how threads are setup and run, initializing the thread system before would be a disaster.
+
+19.	What is a zombie?
+A dead thread that is doing nothing but eating the computer’s brains. It must be destroyed.
+
+20.	How large is the initial run queue?
+32
+
+21.	What does a device name in OS/161 look like?
+“lhd0”
+
+22.	What does a raw device name in OS/161 look like?
+“lhd0raw”
+
+23.	What lock protects the vnode reference count?
+lock *vn_countlock
+
+24.	What device types are currently supported?
+It supports the same devices as FreeBSD, so most devices.
