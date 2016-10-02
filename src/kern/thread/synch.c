@@ -111,8 +111,9 @@ lock_create(const char *name)
 		kfree(lock);
 		return NULL;
 	}
-	
 	// add stuff here as needed
+
+	lock->isHeld = false;
 	
 	return lock;
 }
@@ -120,8 +121,13 @@ lock_create(const char *name)
 void
 lock_destroy(struct lock *lock)
 {
-	assert(lock != NULL);
-
+	if(lock == NULL){
+		panic("can't' destroy lock: lock does not exist, you idiot.");
+	}
+	int spl = splhigh();
+	if(!lock_do_i_hold(lock)){
+		panic("can't' destroy lock: YOU DON'T OWN ME, you idiot.");
+	}
 	// add stuff here as needed
 	
 	kfree(lock->name);
@@ -132,26 +138,50 @@ void
 lock_acquire(struct lock *lock)
 {
 	// Write this
+	if(lock == NULL){
+		panic("can't' acquire lock: lock does not exist, you idiot.");
+	}
+	assert(in_interrupt == 0);
+	int spl = splhigh();
+	assert(!lock_do_i_hold(lock));
+	while(lock->isHeld)
 
-	(void)lock;  // suppress warning until code gets written
+	lock->isHeld = true;
+	lock->holder = curthread;
+	splx = spl;
+	// (void)lock;  // suppress warning until code gets written
 }
 
 void
 lock_release(struct lock *lock)
 {
 	// Write this
-
-	(void)lock;  // suppress warning until code gets written
+	if(lock == NULL){
+		panic("can't' release lock: lock does not exist, you idiot.");
+	}
+	assert(in_interrupt == 0);
+	int spl = splhigh();
+	assert(lock_do_i_hold(lock));
+	lock->holder = NULL;
+	lock->isHeld = false;
+	splx = spl;
+	// (void)lock;  // suppress warning until code gets written
 }
 
 int
 lock_do_i_hold(struct lock *lock)
 {
 	// Write this
-
-	(void)lock;  // suppress warning until code gets written
-
-	return 1;    // dummy until code gets written
+	if(lock == NULL){
+		panic("can't' check lock holder: lock does not exist, you idiot.");
+	}
+	int spl = splhigh();
+	if (lock->isHeld){
+		return (lock->holder == curthread);
+	}
+	// (void)lock;  // suppress warning until code gets written
+	splx(spl);
+	return 0;    // dummy until code gets written
 }
 
 ////////////////////////////////////////////////////////////

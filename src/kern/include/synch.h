@@ -50,6 +50,9 @@ void              sem_destroy(struct semaphore *);
 
 struct lock {
 	char *name;
+	bool isHeld;
+	struct array *waitQueue;
+	thread *holder;
 	// add what you need here
 	// (don't forget to mark things volatile as needed)
 };
