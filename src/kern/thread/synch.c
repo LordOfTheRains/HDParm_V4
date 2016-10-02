@@ -2,7 +2,8 @@
  * Synchronization primitives.
  * See synch.h for specifications of the functions.
  */
-
+#define true 1
+#define false 0
 #include <types.h>
 #include <lib.h>
 #include <synch.h>
@@ -49,7 +50,7 @@ sem_destroy(struct semaphore *sem)
 	 * the semaphore after the above test but before we free it,
 	 * if they're going to do that, they can just as easily wait
 	 * a bit and start sleeping on the semaphore after it's been
-	 * freed. Consequently, there's not a whole lot of point in 
+	 * freed. Consequently, there's not a whole lot of point in
 	 * including the kfrees in the splhigh block, so we don't.
 	 */
 
@@ -57,7 +58,7 @@ sem_destroy(struct semaphore *sem)
 	kfree(sem);
 }
 
-void 
+void
 P(struct semaphore *sem)
 {
 	int spl;
@@ -99,6 +100,7 @@ V(struct semaphore *sem)
 struct lock *
 lock_create(const char *name)
 {
+
 	struct lock *lock;
 
 	lock = kmalloc(sizeof(struct lock));
@@ -114,41 +116,50 @@ lock_create(const char *name)
 	// add stuff here as needed
 
 	lock->isHeld = false;
-	
+	lock->holder = NULL;
+
 	return lock;
 }
 
 void
 lock_destroy(struct lock *lock)
 {
+	/*
+	int spl;
 	if(lock == NULL){
-		panic("can't' destroy lock: lock does not exist, you idiot.");
+		panic("cannot destroy lock: lock does not exist, you idiot.");
 	}
-	int spl = splhigh();
+
+  spl = splhigh();
 	if(!lock_do_i_hold(lock)){
-		panic("can't' destroy lock: YOU DON'T OWN ME, you idiot.");
+		panic("cannot destroy lock: YOU DO NOT OWN ME, you idiot.");
 	}
+	*/
+	// lock_release(lock);
 	// add stuff here as needed
-	
 	kfree(lock->name);
 	kfree(lock);
+	//splx(spl);
 }
 
 void
 lock_acquire(struct lock *lock)
 {
 	// Write this
-	if(lock == NULL){
-		panic("can't' acquire lock: lock does not exist, you idiot.");
+	int spl;
+	assert(lock!=NULL);
+  spl = splhigh();
+	if(lock_do_i_hold(lock)){
+		panic("cannot get the lock: dont double dip, you idiot.");
 	}
-	assert(in_interrupt == 0);
-	int spl = splhigh();
-	assert(!lock_do_i_hold(lock));
-	while(lock->isHeld)
+	//edited this
+	while(lock->isHeld){
+		thread_sleep(lock);
+	};
 
 	lock->isHeld = true;
 	lock->holder = curthread;
-	splx = spl;
+	splx(spl);
 	// (void)lock;  // suppress warning until code gets written
 }
 
@@ -156,32 +167,40 @@ void
 lock_release(struct lock *lock)
 {
 	// Write this
-	if(lock == NULL){
-		panic("can't' release lock: lock does not exist, you idiot.");
+	int spl;
+	assert(lock!=NULL);
+	spl = splhigh();
+	if(!lock_do_i_hold(lock)){
+		panic("cannot release lock: YOU DONT OWN ME, you idiot.");
 	}
-	assert(in_interrupt == 0);
-	int spl = splhigh();
-	assert(lock_do_i_hold(lock));
-	lock->holder = NULL;
-	lock->isHeld = false;
-	splx = spl;
+	else {
+		lock->holder = NULL;
+		lock->isHeld = false;
+		thread_wakeup(lock);
+	}
+	splx(spl);
 	// (void)lock;  // suppress warning until code gets written
 }
 
 int
 lock_do_i_hold(struct lock *lock)
 {
+	/*
 	// Write this
+	int spl, result;
 	if(lock == NULL){
-		panic("can't' check lock holder: lock does not exist, you idiot.");
+		panic("cannot check lock holder: lock does not exist, you idiot.");
 	}
-	int spl = splhigh();
+	spl = splhigh();
 	if (lock->isHeld){
-		return (lock->holder == curthread);
+		result = (lock->holder == curthread);
+	}
+	else {
+		result = 0;
 	}
 	// (void)lock;  // suppress warning until code gets written
-	splx(spl);
-	return 0;    // dummy until code gets written
+	splx(spl);*/
+	return (lock->holder == curthread);    // dummy until code gets written
 }
 
 ////////////////////////////////////////////////////////////
@@ -204,9 +223,9 @@ cv_create(const char *name)
 		kfree(cv);
 		return NULL;
 	}
-	
+
 	// add stuff here as needed
-	
+
 	return cv;
 }
 
@@ -216,7 +235,7 @@ cv_destroy(struct cv *cv)
 	assert(cv != NULL);
 
 	// add stuff here as needed
-	
+
 	kfree(cv->name);
 	kfree(cv);
 }
