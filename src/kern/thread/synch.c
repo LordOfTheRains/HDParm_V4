@@ -223,9 +223,7 @@ cv_create(const char *name)
 		kfree(cv);
 		return NULL;
 	}
-
 	// add stuff here as needed
-
 	return cv;
 }
 
@@ -235,7 +233,6 @@ cv_destroy(struct cv *cv)
 	assert(cv != NULL);
 
 	// add stuff here as needed
-
 	kfree(cv->name);
 	kfree(cv);
 }
@@ -244,22 +241,45 @@ void
 cv_wait(struct cv *cv, struct lock *lock)
 {
 	// Write this
+	assert(cv != NULL && lock !=NULL );
+
+	lock_release(lock);
+	int spl = splhigh();
+	/*
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
+	*/
+	thread_sleep(cv);
+	splx(spl);
+  lock_acquire(lock);
+
 }
 
 void
 cv_signal(struct cv *cv, struct lock *lock)
 {
 	// Write this
+	assert(cv != NULL && lock_do_i_hold(lock));
+	int spl = splhigh();
+	/*
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
+	*/
+	thread_wakeup_one(cv);
+	splx(spl);
 }
 
 void
 cv_broadcast(struct cv *cv, struct lock *lock)
 {
 	// Write this
+	assert(cv != NULL && lock_do_i_hold(lock));
+	int spl = splhigh();
+	thread_wakeup(cv);
+	/*
 	(void)cv;    // suppress warning until code gets written
 	(void)lock;  // suppress warning until code gets written
+	*/
+	splx(spl);
+
 }
