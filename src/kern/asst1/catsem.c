@@ -326,11 +326,11 @@ mousesem(void * unusedpointer,
         if(first_mouse_eating) {
 
                 //If ther is another cat, wait for it to finish
-                if (another_cat_eating) {
+                if (another_mouse_eating) {
                         P(done);
                 }
 
-                kprintf("First Mouse, %lu, is now leaving.\n", catnumber);
+                kprintf("First Mouse, %lu, is now leaving.\n", mousenumber);
                 
                 //No cats are eating
                 P(mutex);
@@ -350,7 +350,7 @@ mousesem(void * unusedpointer,
                 V(mutex);
         } else {
               //Signal that second cat is leaving
-              kprintf("Other Mouse, %lu, is leaving.\n", catnumber);  
+              kprintf("Other Mouse, %lu, is leaving.\n", mousenumber);  
               V(done);
         }
 
