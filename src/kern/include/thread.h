@@ -15,16 +15,16 @@ struct thread {
 	/**********************************************************/
 	/* Private thread members - internal to the thread system */
 	/**********************************************************/
-	
+
 	struct pcb t_pcb;
 	char *t_name;
 	const void *t_sleepaddr;
 	char *t_stack;
-	
+
 	/**********************************************************/
 	/* Public thread members - can be used by other code      */
 	/**********************************************************/
-	
+
 	/*
 	 * This is public because it isn't part of the thread system,
 	 * and will need to be manipulated by the userprog and/or vm
@@ -58,8 +58,8 @@ void thread_shutdown(void);
  * general the child thread might exit at any time.) Returns an error
  * code.
  */
-int thread_fork(const char *name, 
-		void *data1, unsigned long data2, 
+int thread_fork(const char *name,
+		void *data1, unsigned long data2,
 		void (*func)(void *, unsigned long),
 		struct thread **ret);
 
@@ -91,6 +91,13 @@ void thread_sleep(const void *addr);
 void thread_wakeup(const void *addr);
 
 /*
+ * Cause 1 thread sleeping on the specified address to wake up.
+ * Interrupts must be disabled.
+ */
+void thread_wakeup_one(const void *addr);
+
+
+/*
  * Return nonzero if there are any threads sleeping on the specified
  * address. Meant only for diagnostic purposes.
  */
@@ -102,7 +109,7 @@ int thread_hassleepers(const void *addr);
  */
 
 /* Machine independent entry point for new threads. */
-void mi_threadstart(void *data1, unsigned long data2, 
+void mi_threadstart(void *data1, unsigned long data2,
 		    void (*func)(void *, unsigned long));
 
 /* Machine dependent context switch. */
