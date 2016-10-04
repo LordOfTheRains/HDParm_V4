@@ -3,13 +3,13 @@
  *
  * 30-1-2003 : GWA : Stub functions created for CS161 Asst1.
  *
- * NB: Please use SEMAPHORES to solve the cat syncronization problem in 
+ * NB: Please use SEMAPHORES to solve the cat syncronization problem in
  * this file.
  */
 
 
 /*
- * 
+ *
  * Includes
  *
  */
@@ -21,7 +21,7 @@
 
 
 /*
- * 
+ *
  * Constants
  *
  */
@@ -72,9 +72,9 @@ static volatile int mice_done_eating;
 // volatile bool first_cat_eat = true;
 
 /*
- * 
+ *
  * Function Definitions
- * 
+ *
  */
 
 
@@ -95,23 +95,25 @@ static volatile int mice_done_eating;
 
 static
 void
-catsem(void * unusedpointer, 
+catsem(void * unusedpointer,
        unsigned long catnumber)
 {
-        
+
         /*
          * Avoid unused variable warnings.
          */
 
         (void) unusedpointer;
         (void) catnumber;
+        kprintf("Starting cat number %lu.\n", catnumber);
 
         bool first_cat_eating = false;
         bool another_cat_eating = false;
-        int myDish;
+        int my_dish;
 
         P(mutex);
 
+        kprintf("all dishes: %d.\n", all_dishes_available);
         //Check if first cat
         if(all_dishes_available) {
                 //this cat is first
@@ -120,11 +122,13 @@ catsem(void * unusedpointer,
 
                 no_cat_eat = false;
                 first_cat_eating = true;
-        } else {
+
+                kprintf("Cat %lu in the kitchen.about to eat ....\n", catnumber);
+        }/* else {
                 //NOT first cat
                 first_cat_eating = false;
-        }
-
+        }*/
+        kprintf("Cat %lu in the kitchen.waiting ....\n", catnumber);
         cats_wait_count++;
         V(mutex);
 
@@ -134,29 +138,36 @@ catsem(void * unusedpointer,
 
         V(mutex);
         if(first_cat_eating) {
+
+                  kprintf("Cat %lu in the kitchen.\n", catnumber);
                 P(mutex);
                 //If another cat is waiting let them eat
-                if (cats_wait_count > 1) {
+                if (cats_wait_count > 0) {
                         another_cat_eating = true;
                         V(cat_sem);
                 }
+
                 V(mutex);
         }
-        
+
         kprintf("Cat %lu in the kitchen.\n", catnumber);
 
 
         //dish
         P(dish_sem);
-        //check dish 1 not busy. 
+        //check dish 1 not busy.
         if(!dish1Busy){
                 //take dish 1
+                kprintf("Cat %lu in the kitchen.Taking dish 1\n", catnumber);
                 dish1Busy = true;
-                myDish = 1;
+                my_dish = 1;
         } else { //check dish 2 not busy
-                assert(!dish2Busy);
+            kprintf("Cat %lu in the kitchen.Taking dish 2\n", catnumber);
+                if(dish2Busy){
+                  panic("both dish busy");
+                }
                 dish2Busy = true;
-                myDish = 2;
+                my_dish = 2;
         }
         V(dish_sem);
 
@@ -167,13 +178,13 @@ catsem(void * unusedpointer,
 
         P(dish_sem);
         //Release the dish gotten earlier
-        if(myDish == 1){
+        if(my_dish == 1){
                 dish1Busy = false;
         } else {
-                assert(myDish == 2);
+                assert(my_dish == 2);
                 dish2Busy = false;
         }
-        
+
         V(dish_sem);
 
         P(mutex);
@@ -189,7 +200,7 @@ catsem(void * unusedpointer,
                 }
 
                 kprintf("First cat, %lu, is now leaving.\n", catnumber);
-                
+
                 //No cats are eating
                 P(mutex);
                 no_cat_eat = true;
@@ -208,8 +219,23 @@ catsem(void * unusedpointer,
                 V(mutex);
         } else {
               //Signal that second cat is leaving
-              kprintf("Other cat, %lu, is leaving.\n", catnumber);  
+              kprintf("Other cat, %lu, is leaving.\n", catnumber);
               V(done);
+              P(mutex);
+              no_cat_eat = true;
+              V(mutex);
+
+              //If mice are waiting, switch to mouse context.
+              //else let more cats in
+              P(mutex);
+              if (mice_wait_count > 0) {
+                      V(mouse_sem);
+              } else if (cats_wait_count > 0) {
+                      V(cat_sem);
+              } else {
+                      all_dishes_available = true;
+              }
+              V(mutex);
         }
 
         //Signal that this fat kitty is done eating
@@ -218,14 +244,14 @@ catsem(void * unusedpointer,
         V(all_done);
         V(mutex);
 }
-        
+
 
 /*
  * mousesem()
  *
  * Arguments:
  *      void * unusedpointer: currently unused.
- *      unsigned long mousenumber: holds the mouse identifier from 0 to 
+ *      unsigned long mousenumber: holds the mouse identifier from 0 to
  *              NMICE - 1.
  *
  * Returns:
@@ -238,7 +264,7 @@ catsem(void * unusedpointer,
 
 static
 void
-mousesem(void * unusedpointer, 
+mousesem(void * unusedpointer,
          unsigned long mousenumber)
 {
         /*
@@ -247,58 +273,60 @@ mousesem(void * unusedpointer,
 
         (void) unusedpointer;
         (void) mousenumber;
-
+        kprintf("Starting mouse number %lu.\n", mousenumber);
         bool first_mouse_eating = false;
         bool another_mouse_eating = false;
-        int myDish;
+        int my_dish;
 
         P(mutex);
 
         //Check if first mouse
         if(all_dishes_available) {
                 //this mouse is first
+                kprintf(" %lu.\n", mousenumber);
                 all_dishes_available = false;
                 V(mouse_sem);
 
                 no_mouse_eat = false;
                 first_mouse_eating = true;
-        } else {
+                kprintf("Mouse %lu in the kitchen.about to eat ....\n", mousenumber);
+        } /*else {
                 //NOT first mouse
                 first_mouse_eating = false;
-        }
+        }*/
 
         mice_wait_count++;
         V(mutex);
 
-        P(mouse_sem); //let cat in
+        P(mouse_sem); //let mice in
 
         P(mutex);
 
         V(mutex);
         if(first_mouse_eating) {
                 P(mutex);
-                //If another cat is waiting le tthem eat
-                if (mice_wait_count > 1) {
+                //If another mouse is waiting le tthem eat
+                if (mice_wait_count > 0) {
                         another_mouse_eating = true;
-                        V(cat_sem);
+                        V(mouse_sem);
                 }
                 V(mutex);
         }
-        
+
         kprintf("Mouse %lu in the kitchen.\n", mousenumber);
 
 
         //dish
         P(dish_sem);
-        //check dish 1 not busy. 
+        //check dish 1 not busy.
         if(!dish1Busy){
                 //take dish 1
                 dish1Busy = true;
-                myDish = 1;
+                my_dish = 1;
         } else { //check dish 2 not busy
                 assert(!dish2Busy);
                 dish2Busy = true;
-                myDish = 2;
+                my_dish = 2;
         }
         V(dish_sem);
 
@@ -309,13 +337,13 @@ mousesem(void * unusedpointer,
 
         P(dish_sem);
         //Release the dish gotten earlier
-        if(myDish == 1){
+        if(my_dish == 1){
                 dish1Busy = false;
         } else {
-                assert(myDish == 2);
+                assert(my_dish == 2);
                 dish2Busy = false;
         }
-        
+
         V(dish_sem);
 
         P(mutex);
@@ -325,24 +353,23 @@ mousesem(void * unusedpointer,
         //Leave kitchen
         if(first_mouse_eating) {
 
-                //If ther is another cat, wait for it to finish
+                //If ther is another mouse, wait for it to finish
                 if (another_mouse_eating) {
                         P(done);
                 }
 
                 kprintf("First Mouse, %lu, is now leaving.\n", mousenumber);
-                
-                //No cats are eating
-                P(mutex);
-                no_cat_eat = true;
-                V(mutex);
 
+                //No mouse are eating
+                P(mutex);
+                no_mouse_eat = true;
+                V(mutex);
                 //If cats are waiting, switch to cat context.
                 //else let more mice in
                 P(mutex);
                 if (cats_wait_count > 0) {
                         V(cat_sem);
-                } else if (cats_wait_count > 0) {
+                } else if (mice_wait_count > 0) {
                         V(mouse_sem);
                 } else {
                         all_dishes_available = true;
@@ -350,8 +377,25 @@ mousesem(void * unusedpointer,
                 V(mutex);
         } else {
               //Signal that second cat is leaving
-              kprintf("Other Mouse, %lu, is leaving.\n", mousenumber);  
+              kprintf("Other Mouse %lu, is leaving.\n", mousenumber);
               V(done);
+
+              //No mouse are eating
+              P(mutex);
+              no_mouse_eat = true;
+              V(mutex);
+              //If cats are waiting, switch to cat context.
+              //else let more mice in
+              P(mutex);
+              if (cats_wait_count > 0) {
+                      V(cat_sem);
+              } else if (mice_wait_count > 0) {
+                      V(mouse_sem);
+              } else {
+                      all_dishes_available = true;
+              }
+              V(mutex);
+
         }
 
         //Signal that this fat kitty is done eating
@@ -380,7 +424,7 @@ init_catmousesem() {
         dish1Busy = false;
         dish2Busy = false;
 
-        mutex = sem_create("mutex", 0);
+        mutex = sem_create("mutex", 1);
         dish_sem = sem_create("dish_sem", 1);
         cat_sem = sem_create("cat_sem", 0);
         mouse_sem = sem_create("mouse_sem", 0);
@@ -435,7 +479,7 @@ end_catmousesem() {
  *      0 on success.
  *
  * Notes:
- *      Driver code to start up catsem() and mousesem() threads.  Change this 
+ *      Driver code to start up catsem() and mousesem() threads.  Change this
  *      code as necessary for your solution.
  */
 
@@ -444,14 +488,14 @@ catmousesem(int nargs,
             char ** args)
 {
         int index, error;
-   
+        kprintf("Catsem started, OH BOY\n");
         /*
          * Avoid unused variable warnings.
          */
 
         (void) nargs;
         (void) args;
-        
+
         //init the global variables and create the semaphores
         init_catmousesem();
         /*
@@ -459,46 +503,46 @@ catmousesem(int nargs,
          */
 
         for (index = 0; index < NCATS; index++) {
-           
-                error = thread_fork("catsem Thread", 
-                                    NULL, 
-                                    index, 
-                                    catsem, 
+
+                error = thread_fork("catsem Thread",
+                                    NULL,
+                                    index,
+                                    catsem,
                                     NULL
                                     );
-                
+
                 /*
                  * panic() on error.
                  */
 
                 if (error) {
-                 
-                        panic("catsem: thread_fork failed: %s\n", 
+
+                        panic("catsem: thread_fork failed: %s\n",
                               strerror(error)
                               );
                 }
         }
-        
+
         /*
          * Start NMICE mousesem() threads.
          */
 
         for (index = 0; index < NMICE; index++) {
-   
-                error = thread_fork("mousesem Thread", 
-                                    NULL, 
-                                    index, 
-                                    mousesem, 
+
+                error = thread_fork("mousesem Thread",
+                                    NULL,
+                                    index,
+                                    mousesem,
                                     NULL
                                     );
-                
+
                 /*
                  * panic() on error.
                  */
 
                 if (error) {
-         
-                        panic("mousesem: thread_fork failed: %s\n", 
+
+                        panic("mousesem: thread_fork failed: %s\n",
                               strerror(error)
                               );
                 }
@@ -507,7 +551,7 @@ catmousesem(int nargs,
         //Wait for the animals to feed
         while (cats_done_eating < NCATS || mice_done_eating < NMICE) {
                 P(all_done);
-        }
+        };
         //cleanup
         end_catmousesem();
         return 0;
