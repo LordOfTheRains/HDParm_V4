@@ -35,7 +35,7 @@ static struct array *zombies;
 static int numthreads;
 
 /*
- * Create a thread. This is used both to create the first thread's 
+ * Create a thread. This is used both to create the first thread's
  * thread structure and to create subsequent threads.
  */
 
@@ -54,14 +54,14 @@ thread_create(const char *name)
 	}
 	thread->t_sleepaddr = NULL;
 	thread->t_stack = NULL;
-	
+
 	thread->t_vmspace = NULL;
 
 	thread->t_cwd = NULL;
-	
+
 	// If you add things to the thread structure, be sure to initialize
 	// them here.
-	
+
 	return thread;
 }
 
@@ -83,7 +83,7 @@ thread_destroy(struct thread *thread)
 	// These things are cleaned up in thread_exit.
 	assert(thread->t_vmspace==NULL);
 	assert(thread->t_cwd==NULL);
-	
+
 	if (thread->t_stack) {
 		kfree(thread->t_stack);
 	}
@@ -104,7 +104,7 @@ exorcise(void)
 	int i, result;
 
 	assert(curspl>0);
-	
+
 	for (i=0; i<array_getnum(zombies); i++) {
 		struct thread *z = array_getguy(zombies, i);
 		assert(z!=curthread);
@@ -116,7 +116,7 @@ exorcise(void)
 }
 
 /*
- * Kill all sleeping threads. This is used during panic shutdown to make 
+ * Kill all sleeping threads. This is used during panic shutdown to make
  * sure they don't wake up again and interfere with the panic.
  */
 static
@@ -181,7 +181,7 @@ thread_bootstrap(void)
 	if (zombies==NULL) {
 		panic("Cannot create zombies array\n");
 	}
-	
+
 	/*
 	 * Create the thread structure for the first thread
 	 * (the one that's already running)
@@ -229,7 +229,7 @@ thread_shutdown(void)
  * DATA1 and DATA2 are passed to FUNC.
  */
 int
-thread_fork(const char *name, 
+thread_fork(const char *name,
 	    void *data1, unsigned long data2,
 	    void (*func)(void *, unsigned long),
 	    struct thread **ret)
@@ -338,7 +338,7 @@ mi_switch(threadstate_t nextstate)
 {
 	struct thread *cur, *next;
 	int result;
-	
+
 	/* Interrupts should already be off. */
 	assert(curspl>0);
 
@@ -355,8 +355,8 @@ mi_switch(threadstate_t nextstate)
 		assert(curthread->t_stack[2] == (char)0xda);
 		assert(curthread->t_stack[3] == (char)0x33);
 	}
-	
-	/* 
+
+	/*
 	 * We set curthread to NULL while the scheduler is running, to
 	 * make sure we don't call it recursively (this could happen
 	 * otherwise, if we get a timer interrupt in the idle loop.)
@@ -396,13 +396,13 @@ mi_switch(threadstate_t nextstate)
 
 	/* update curthread */
 	curthread = next;
-	
-	/* 
+
+	/*
 	 * Call the machine-dependent code that actually does the
 	 * context switch.
 	 */
 	md_switch(&cur->t_pcb, &next->t_pcb);
-	
+
 	/*
 	 * If we switch to a new thread, we don't come here, so anything
 	 * done here must be in mi_threadstart() as well, or be skippable,
@@ -489,7 +489,7 @@ thread_yield(void)
  * primitive or data structure.
  *
  * Note that (1) interrupts must be off (if they aren't, you can
- * end up sleeping forever), and (2) you cannot sleep in an 
+ * end up sleeping forever), and (2) you cannot sleep in an
  * interrupt handler.
  */
 void
@@ -497,7 +497,7 @@ thread_sleep(const void *addr)
 {
 	// may not sleep in an interrupt handler
 	assert(in_interrupt==0);
-	
+
 	curthread->t_sleepaddr = addr;
 	mi_switch(S_SLEEP);
 	curthread->t_sleepaddr = NULL;
@@ -511,19 +511,19 @@ void
 thread_wakeup(const void *addr)
 {
 	int i, result;
-	
+
 	// meant to be called with interrupts off
 	assert(curspl>0);
-	
+
 	// This is inefficient. Feel free to improve it.
-	
+
 	for (i=0; i<array_getnum(sleepers); i++) {
 		struct thread *t = array_getguy(sleepers, i);
 		if (t->t_sleepaddr == addr) {
-			
+
 			// Remove from list
 			array_remove(sleepers, i);
-			
+
 			// must look at the same sleepers[i] again
 			i--;
 
@@ -538,6 +538,43 @@ thread_wakeup(const void *addr)
 }
 
 /*
+ * Wake up one threads who are sleeping on "sleep address"
+ * ADDR.
+ */
+void
+thread_wakeup_one(const void *addr)
+{
+	int i, result;
+
+	// meant to be called with interrupts off
+	assert(curspl>0);
+
+	// This is inefficient. Feel free to improve it.
+
+	for (i=0; i<array_getnum(sleepers); i++) {
+		struct thread *t = array_getguy(sleepers, i);
+		if (t->t_sleepaddr == addr) {
+
+			// Remove from list
+			array_remove(sleepers, i);
+
+			// must look at the same sleepers[i] again
+
+			/*
+			 * Because we preallocate during thread_fork,
+			 * this should never fail.
+			 */
+			result = make_runnable(t);
+			assert(result==0);
+		}
+	}
+}
+
+
+
+
+
+/*
  * Return nonzero if there are any threads who are sleeping on "sleep address"
  * ADDR. This is meant to be used only for diagnostic purposes.
  */
@@ -545,10 +582,10 @@ int
 thread_hassleepers(const void *addr)
 {
 	int i;
-	
+
 	// meant to be called with interrupts off
 	assert(curspl>0);
-	
+
 	for (i=0; i<array_getnum(sleepers); i++) {
 		struct thread *t = array_getguy(sleepers, i);
 		if (t->t_sleepaddr == addr) {
@@ -564,7 +601,7 @@ thread_hassleepers(const void *addr)
  * thread_exit() can be called automatically.
  */
 void
-mi_threadstart(void *data1, unsigned long data2, 
+mi_threadstart(void *data1, unsigned long data2,
 	       void (*func)(void *, unsigned long))
 {
 	/* If we have an address space, activate it */
@@ -585,7 +622,7 @@ mi_threadstart(void *data1, unsigned long data2,
 		}
 	}
 #endif
-	
+
 	/* Call the function */
 	func(data1, data2);
 
