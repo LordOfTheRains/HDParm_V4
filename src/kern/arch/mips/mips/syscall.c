@@ -6,7 +6,8 @@
 #include <machine/trapframe.h>
 #include <kern/callno.h>
 #include <syscall.h>
-
+#include <process.h>
+#include <file.h>
 
 /*
  * System call handler.
@@ -61,11 +62,14 @@ mips_syscall(struct trapframe *tf)
 	 * really return a value, just 0 for success and -1 on
 	 * error. Since retval is the value returned on success,
 	 * initialize it to 0 by default; thus it's not necessary to
-	 * deal with it except for calls that return other values, 
+	 * deal with it except for calls that return other values,
 	 * like write.
 	 */
 
+
 	retval = 0;
+
+	kprintf("outside switch %d\n", callno);
 
 	switch (callno) {
 	    case SYS_reboot:
@@ -73,7 +77,93 @@ mips_syscall(struct trapframe *tf)
 		break;
 
 	    /* Add stuff here */
- 
+	/*
+#define SYS__exit        0
+#define SYS_execv        1
+#define SYS_fork         2
+#define SYS_waitpid      3
+#define SYS_open         4
+#define SYS_read         5
+#define SYS_write        6
+#define SYS_close        7
+
+#define SYS_getpid       11
+#define SYS_lseek        13
+
+#define SYS_dup2         26
+	*/
+
+	    case SYS__exit:
+								kprintf("inside exit");
+                //err = sys__exit(&retval);
+                err = sys_fork();
+                break;
+
+	    case SYS_execv:
+		  				kprintf("inside execv");
+                // err = sys_execv(&retval);
+								err = sys_fork();
+
+                break;
+
+	    case SYS_fork:
+								kprintf("inside fork");
+                err = sys_fork();
+                break;
+
+	    case SYS_waitpid:
+								kprintf("inside waitpid");
+                // err = sys_waitpid(&retval);
+								err = sys_fork();
+
+                break;
+
+	     case SYS_open:
+			 					kprintf("inside open");
+                // err = sys_open(const char *path, int oflag, mode_t mode);
+								err = sys_fork();
+
+                break;
+
+	    case SYS_read:
+								kprintf("inside read");
+                // err = sys_read(&retval);
+								err = sys_fork();
+
+                break;
+
+	    case SYS_write:
+								kprintf("inside write");
+                // err = sys_write(&retval);
+								err = sys_fork();
+
+                break;
+
+	    case SYS_close:
+								kprintf("inside close");
+                // err = sys_close(&retval);
+								err = sys_fork();
+
+                break;
+				case SYS_getpid:
+								kprintf("inside sysgetpid");
+                err = sys_getpid(&retval);
+                break;
+
+	      case SYS_lseek:
+								kprintf("inside lseek");
+                // err = sys_lseek(&retval);
+								err = sys_fork();
+
+                break;
+
+	    case SYS_dup2:
+								kprintf("inside dup2");
+                // err = sys_dup2(&retval);
+								err = sys_fork();
+
+                break;
+
 	    default:
 		kprintf("Unknown syscall %d\n", callno);
 		err = ENOSYS;
@@ -95,12 +185,12 @@ mips_syscall(struct trapframe *tf)
 		tf->tf_v0 = retval;
 		tf->tf_a3 = 0;      /* signal no error */
 	}
-	
+
 	/*
 	 * Now, advance the program counter, to avoid restarting
 	 * the syscall over and over again.
 	 */
-	
+
 	tf->tf_epc += 4;
 
 	/* Make sure the syscall code didn't forget to lower spl */
