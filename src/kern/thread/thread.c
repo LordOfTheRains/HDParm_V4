@@ -429,7 +429,6 @@ mi_switch(threadstate_t nextstate)
 void
 thread_exit(void)
 {
-	
 	if (curthread->t_stack != NULL) {
 		/*
 		 * Check the magic number we put on the bottom end of
