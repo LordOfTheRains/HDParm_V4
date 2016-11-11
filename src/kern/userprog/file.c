@@ -1,18 +1,69 @@
 #include <types.h>
 #include <file.h>
-//#include <syscall.h>
+#include <syscall.h>
 #include <thread.h>
 #include <curthread.h>
-
-/*sample implementation of sys_getpid() */
 
 //int sys_open(const char *path, int oflag, mode_t mode)
 int
 sys_open(const char *path, int oflag, int mode)
 {
     kprintf("inside open syscall\n");
-    //test comment please ignore
-    return 0;
+
+    struct vnode *vn;
+    struct openFile file;
+    int err;
+
+    //Use vfs_open and check for errors. If error, return.
+    err = vfs_open(path, oflag, &vn);
+    if (err) {
+        return err;
+    }
+    
+    file = kmalloc(sizeof(struct openFile));
+    if (file == NULL) {
+        vfs_close(vn);
+        return ENOMEM;
+    }
+
+    //init file
+    file->fLock     = lock_create("file lock");
+    if (file->fLock == NULL ) {
+        vfs_close(vn);
+        kfree(file);
+        return ENOMEM;
+    }
+
+    file->fVnode    = vn;
+    file->fMode     = mode;
+    file->fRefCount = 1;
+    file->fOffset   = 0;
+
+    //check valid access mode
+    KASSERT(file->fMode==O_RDONLY || file->fMode==O_WRONLY || file->fMode==0_RDWR);
+
+    //Place file in fileTable
+    struct fileTable *ft = curthread->t_filetable;
+    int i;
+    bool added = false; //bool that indicates if the file has been added to table
+    for (i = 0; i < MAX_OPEN_FILES; i++) {
+        if (ft->tOpenfiles[i] == NULL) {
+            //fd = i;
+            added = true;
+        }
+    }
+
+    //If file successfully added, return 0.
+    //else return EMFILE error
+    if (added) {
+        lock_destroy(file->fLock);
+        kfree(file);
+        vfs_close(vn);
+        return 0;
+    } else {
+        return EMFILE;
+    }
+
 }
 
 
