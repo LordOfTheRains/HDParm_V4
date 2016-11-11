@@ -5,7 +5,7 @@ int main() {
 
 	int mypid;
 	mypid = getpid();
-
+	/*
 	fork();
 	open();
 	read();
@@ -15,7 +15,7 @@ int main() {
 	_execv();
 	waitpid();
 	lseek();
-
+	*/
 	reboot(RB_REBOOT);
 	return 0;
 }
