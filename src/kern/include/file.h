@@ -1,21 +1,29 @@
 #ifndef _FILE_H_
 #define _FILE_H_
 
-#include <vnode.h>
 #include <types.h>
 #include <lib.h>
 #include <synch.h>
-#include <uio.h>
-#include <current.h>
-#include <limits.h>
+#include <array.h>
 #include <vfs.h>
-#include <file.h>
-#include <syscall.h>
-#include <kern/errno.h>
+#include <vnode.h>
+#include <fs.h>
+#include <uio.h>
+#include <device.h>
 #include <kern/limits.h>
-#include <kern/stat.h>
 #include <kern/unistd.h>
+#include <kern/errno.h>
+#include <thread.h>
+#include <current.h>
+#include <file.h>
 #include <kern/fcntl.h>
+#include <copyinout.h>
+#include <kern/seek.h>
+#include <file.h>
+#include <limits.h>
+#include <kern/stat.h>
+#include <spl.h>
+#include <current.h>
 
 #define MAX_OPEN_FILES = 1;
 /*

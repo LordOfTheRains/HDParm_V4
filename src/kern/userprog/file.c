@@ -1,14 +1,26 @@
 #include <types.h>
 #include <lib.h>
 #include <synch.h>
-#include <uio.h>
-#include <thread.h>
-#include <current.h>
+#include <array.h>
 #include <vfs.h>
 #include <vnode.h>
+#include <fs.h>
+#include <uio.h>
+#include <device.h>
+#include <kern/limits.h>
+#include <kern/unistd.h>
+#include <kern/errno.h>
+#include <thread.h>
+#include <current.h>
 #include <file.h>
-#include <syscall.h>
-
+#include <kern/fcntl.h>
+#include <copyinout.h>
+#include <kern/seek.h>
+#include <file.h>
+#include <limits.h>
+#include <kern/stat.h>
+#include <spl.h>
+#include <current.h>
 //int sys_open(const char *path, int oflag, mode_t mode)
 int
 sys_open(const char *path, int oflag, int mode)
