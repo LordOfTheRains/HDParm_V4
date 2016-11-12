@@ -1,8 +1,13 @@
 #include <types.h>
+#include <lib.h>
+#include <synch.h>
+#include <uio.h>
+#include <thread.h>
+#include <current.h>
+#include <vfs.h>
+#include <vnode.h>
 #include <file.h>
 #include <syscall.h>
-#include <thread.h>
-#include <curthread.h>
 
 //int sys_open(const char *path, int oflag, mode_t mode)
 int
@@ -21,14 +26,14 @@ sys_open(const char *path, int oflag, int mode)
     }
     
     file = kmalloc(sizeof(struct openFile));
-    if (file == NULL) {
+    if (file==NULL) {
         vfs_close(vn);
         return ENOMEM;
     }
 
     //init file
     file->fLock     = lock_create("file lock");
-    if (file->fLock == NULL ) {
+    if (file->fLock==NULL ) {
         vfs_close(vn);
         kfree(file);
         return ENOMEM;

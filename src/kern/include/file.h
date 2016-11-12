@@ -2,12 +2,14 @@
 #define _FILE_H_
 
 #include <vnode.h>
-#include <thread.h>
+#include <types.h>
 #include <lib.h>
+#include <synch.h>
 #include <uio.h>
-#include <types.c>
+#include <current.h>
+#include <vfs.h>
+#include <file.h>
 #include <syscall.h>
-#include <curthread.h>
 
 #define MAX_OPEN_FILES = 1;
 /*
