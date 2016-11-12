@@ -13,6 +13,10 @@ sys_getpid(pid_t *retval)
     return 0;
 }
 
+int
+sys_fork() {
+    kprintf("If you're reading this, sys_fork needs to be uncommented");
+}
 // int
 // sys_fork(struct *parent_tf, int *retval)
 // {
