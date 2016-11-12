@@ -197,9 +197,9 @@ mips_syscall(struct trapframe *tf)
 	assert(curspl==0);
 }
 
-void
-md_forkentry(void *tf, unsigned long addr)
-{
+// void
+// md_forkentry(void *tf, unsigned long addr)
+// {
 	/*
 	 * This function is provided as a reminder. You need to write
 	 * both it and the code that calls it.
@@ -215,4 +215,4 @@ md_forkentry(void *tf, unsigned long addr)
 	//  as_activate(new_addr);
 
 
-}
+// }
