@@ -16,7 +16,7 @@ sys_getpid(pid_t *retval)
 int
 sys_fork(struct *parent_tf, int *retval)
 {
-    // kprintf("inside fork syscall\n");
+    kprintf("inside fork syscall\n");
     // int mybaby = 0;
     // struct thread *mybaby_thread;
     // //copy  parent tf
@@ -69,7 +69,7 @@ int
 sys_exit()
 {
     kprintf("inside _exit syscall\n");
-    curthread->exit_status = 0;
-    thread_exit();
+    // curthread->exit_status = 0;
+    // thread_exit();
     return 0;
 }
