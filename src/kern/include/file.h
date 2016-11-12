@@ -10,6 +10,7 @@
 #include <vfs.h>
 #include <file.h>
 #include <syscall.h>
+#include <kern/errno.h>
 
 #define MAX_OPEN_FILES = 1;
 /*
