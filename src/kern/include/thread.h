@@ -21,7 +21,7 @@ struct thread {
 	const void *t_sleepaddr;
 	char *t_stack;
     pid_t t_pid;
-	struct filetable *t_filetable;
+	struct fileTable *t_filetable;
 
 	/**********************************************************/
 	/* Public thread members - can be used by other code      */

@@ -7,6 +7,7 @@
 #include <synch.h>
 #include <uio.h>
 #include <current.h>
+#include <limits.h>
 #include <vfs.h>
 #include <file.h>
 #include <syscall.h>

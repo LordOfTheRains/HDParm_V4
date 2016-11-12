@@ -16,7 +16,7 @@ sys_open(const char *path, int oflag, int mode)
     kprintf("inside open syscall\n");
 
     struct vnode *vn;
-    struct openFile file;
+    struct openFile *file;
     int err;
 
     //Use vfs_open and check for errors. If error, return.
@@ -48,7 +48,7 @@ sys_open(const char *path, int oflag, int mode)
     KASSERT(file->fMode==O_RDONLY || file->fMode==O_WRONLY || file->fMode==0_RDWR);
 
     //Place file in fileTable
-    struct fileTable *ft = curthread->t_filetable;
+    struct fileTable *ft = curthread->t_fileTable;
     int i;
     bool added = false; //bool that indicates if the file has been added to table
     for (i = 0; i < MAX_OPEN_FILES; i++) {
