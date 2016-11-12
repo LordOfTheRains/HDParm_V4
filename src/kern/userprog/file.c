@@ -49,7 +49,7 @@ sys_open(const char *path, int oflag, int mode)
     file->fOffset   = 0;
 
     //check valid access mode
-    KASSERT(file->fMode==O_RDONLY || file->fMode==O_WRONLY || file->fMode==0_RDWR);
+    KASSERT(file->fMode==O_RDONLY || file->fMode==O_WRONLY || file->fMode==O_RDWR);
 
     //Place file in fileTable
     struct fileTable *ft = curthread->t_fileTable;
