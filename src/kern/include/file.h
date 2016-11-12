@@ -5,6 +5,9 @@
 #include <thread.h>
 #include <lib.h>
 #include <uio.h>
+#include <types.c>
+#include <syscall.h>
+#include <curthread.h>
 
 #define MAX_OPEN_FILES = 1;
 /*
