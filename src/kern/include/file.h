@@ -9,6 +9,7 @@
 #include <vnode.h>
 #include <fs.h>
 #include <uio.h>
+#include <curthread.h>
 #include <device.h>
 #include <kern/limits.h>
 #include <kern/unistd.h>
@@ -23,7 +24,6 @@
 #include <limits.h>
 #include <kern/stat.h>
 #include <spl.h>
-#include <current.h>
 
 #define MAX_OPEN_FILES = 1;
 /*

@@ -7,6 +7,7 @@
 #include <fs.h>
 #include <uio.h>
 #include <device.h>
+#include <curthread.h>
 #include <kern/limits.h>
 #include <kern/unistd.h>
 #include <kern/errno.h>
