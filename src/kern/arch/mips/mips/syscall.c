@@ -198,7 +198,7 @@ mips_syscall(struct trapframe *tf)
 }
 
 void
-md_forkentry(struct trapframe *tf)
+md_forkentry(void *tf, unsigned long addr)
 {
 	/*
 	 * This function is provided as a reminder. You need to write
@@ -206,6 +206,13 @@ md_forkentry(struct trapframe *tf)
 	 *
 	 * Thus, you can trash it and do things another way if you prefer.
 	 */
+	 (void)useless;
+	 strcut trapframe new_tf = ((void **)arg1)[0];
+	 strcut addrspace new_addr = ((void **)arg1)[1];
 
-	(void)tf;
+
+
+	 as_activate(new_addr);
+
+
 }

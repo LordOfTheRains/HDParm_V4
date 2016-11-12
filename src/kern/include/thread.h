@@ -20,13 +20,15 @@ struct thread {
 	char *t_name;
 	const void *t_sleepaddr;
 	char *t_stack;
+
     pid_t t_pid;
 	struct fileTable *t_fileTable;
+
 
 	/**********************************************************/
 	/* Public thread members - can be used by other code      */
 	/**********************************************************/
-
+	pid_t t_pid;
 	/*
 	 * This is public because it isn't part of the thread system,
 	 * and will need to be manipulated by the userprog and/or vm
