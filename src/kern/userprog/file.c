@@ -62,9 +62,10 @@ sys_open(const char *path, int oflag, int mode)
 
     //Place file in fileTable
     struct fileTable *ft = curthread->t_fileTable;
-    int i;
+
     bool added = false; //bool that indicates if the file has been added to table
-    for (i = 0; i < MAX_OPEN_FILES; i++) {
+    int i;
+    for (i = 0; i < MAX_OPEN_FILES; i = i + 1) {
         if (ft->tOpenfiles[i] == NULL) {
             //fd = i;
             added = true;
