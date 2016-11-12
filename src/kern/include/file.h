@@ -11,6 +11,10 @@
 #include <file.h>
 #include <syscall.h>
 #include <kern/errno.h>
+#include <kern/limits.h>
+#include <kern/stat.h>
+#include <kern/unistd.h>
+#include <kern/fcntl.h>
 
 #define MAX_OPEN_FILES = 1;
 /*
