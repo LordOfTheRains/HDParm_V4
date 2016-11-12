@@ -10,20 +10,14 @@
 #include <fs.h>
 #include <uio.h>
 #include <curthread.h>
-#include <device.h>
 #include <kern/limits.h>
 #include <kern/unistd.h>
 #include <kern/errno.h>
 #include <thread.h>
 #include <current.h>
 #include <file.h>
-#include <kern/fcntl.h>
-#include <copyinout.h>
-#include <kern/seek.h>
 #include <file.h>
-#include <limits.h>
 #include <kern/stat.h>
-#include <spl.h>
 
 #define MAX_OPEN_FILES = 1;
 /*
