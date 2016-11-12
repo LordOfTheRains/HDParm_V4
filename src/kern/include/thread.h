@@ -20,8 +20,6 @@ struct thread {
 	char *t_name;
 	const void *t_sleepaddr;
 	char *t_stack;
-
-    pid_t t_pid;
 	struct fileTable *t_fileTable;
 
 
