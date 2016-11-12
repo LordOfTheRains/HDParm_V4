@@ -11,8 +11,6 @@
 #include <kern/unistd.h>
 #include <kern/errno.h>
 #include <thread.h>
-#include <current.h>
-#include <file.h>
 #include <file.h>
 #include <kern/stat.h>
 //int sys_open(const char *path, int oflag, mode_t mode)

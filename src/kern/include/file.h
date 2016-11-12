@@ -14,9 +14,6 @@
 #include <kern/unistd.h>
 #include <kern/errno.h>
 #include <thread.h>
-#include <current.h>
-#include <file.h>
-#include <file.h>
 #include <kern/stat.h>
 
 #define MAX_OPEN_FILES = 1;
