@@ -25,11 +25,11 @@ sys_open(const char *path, int oflag, int mode)
         return err;
     }
     
-    file = kmalloc(sizeof(struct openFile));
-    if (file==NULL) {
-        vfs_close(vn);
-        return ENOMEM;
-    }
+    kmalloc(sizeof(struct openFile));
+    // if (file==NULL) {
+    //     vfs_close(vn);
+    //     return ENOMEM;
+    // }
 
     //init file
     file->fLock     = lock_create("file lock");
