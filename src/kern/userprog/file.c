@@ -125,7 +125,6 @@ sys_write(int fd, const void *buf, size_t nbytes)
     kprintf("inside write syscall\n");
     int check = check_valid(fd); 
     if (check) {
-        kprintf("File invalid\n");
         return check;
     }
     struct openFile *file;
@@ -161,7 +160,6 @@ sys_lseek(int fd,  off_t offset, int whence)
     kprintf("inside lseek syscall\n");
     int check = check_valid(fd); 
     if (check) {
-        kprintf("File invalid. Error: %d\n", check);
         return check;
     }
     struct fileTable *ft = curthread->t_fileTable;
@@ -253,18 +251,47 @@ int
 sys_dup2(int oldfd, int newfd)
 {
     kprintf("inside dup2 syscall\n");
-    return 0;
+    int check = check_valid(fd);
+    if (check) {
+        return check;
+    }
+
+    struct fileTable *ft = curthread->t_fileTable;
+    //make sure newfd is valid
+    if (newfd > MAX_OPEN_FILES || ft->tOpenfiles[newfd] != NULL){
+        kprintf("newfd %d is not a valid descriptor\n", newfd);
+        return EBADF;
+    }
+    
+    //muh files
+    struct openFile *oldFile = ft->tOpenfiles[oldfd];
+    struct openFile *newFile;
+
+    lock_acquire(oldFile->fLock);
+
+    //copy dat metadata
+    newFile->fVnode = oldFile->fVnode;
+    newFile->fOffset = oldFile->fOffset;
+    newFile->fMode = oldFile->fMode;
+    newFile->fLock = oldFile->fLock;
+    ft[newfd] = newFile;
+    kprintf("%d duped to %d\n", oldfd, newfd);
+    lock_release(oldFile->fLock);
+    return newfd;
 }
 
 int
 check_valid(int *fd) {
     //check valid fd
     if (fd < 0) {
+        kprintf("File invalid. Error: %d\n", EBADF);
         return EBADF;
     }
     //check valid fileTable
     if (curthread->t_fileTable == NULL) {
+        kprintf("File invalid. Error: %d\n", EBADF);
         return EBADF;
     }
+    kprintf("File is okay :D\n");
     return 0;
 }
