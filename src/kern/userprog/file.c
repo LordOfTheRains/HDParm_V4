@@ -127,7 +127,7 @@ sys_write(int fd, const void *buf, size_t nbytes)
     if (check) {
         return check;
     }
-
+    struct openFile file;
     struct fileTable *ft = curthread->t_fileTable;
 
     file = ft->tOpenfiles[fd];
