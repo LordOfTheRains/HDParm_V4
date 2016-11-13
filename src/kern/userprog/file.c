@@ -229,7 +229,7 @@ sys_close(int fd)
     kprintf("inside close syscall\n");
     int check = check_valid(fd);
     if (check) {
-        return result;
+        return check;
     }
     //GET DEM FILES 
     struct fileTable *ft = curthread->t_fileTable;
