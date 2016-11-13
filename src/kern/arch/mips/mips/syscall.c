@@ -128,21 +128,21 @@ mips_syscall(struct trapframe *tf)
 	    case SYS_read:
 								kprintf("inside read");
                 // err = sys_read(&retval);
-								err = sys_fork();
+								err = sys_read(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_write:
 								kprintf("inside write");
                 // err = sys_write(&retval);
-								err = sys_fork();
+								err = sys_write(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_close:
 								kprintf("inside close");
                 // err = sys_close(&retval);
-								err = sys_fork();
+								err = sys_close(tf->tf_a0);
 
                 break;
 				case SYS_getpid:
@@ -153,14 +153,14 @@ mips_syscall(struct trapframe *tf)
 	      case SYS_lseek:
 								kprintf("inside lseek");
                 // err = sys_lseek(&retval);
-								err = sys_fork();
+								err = sys_lseek(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_dup2:
 								kprintf("inside dup2");
                 // err = sys_dup2(&retval);
-								err = sys_fork();
+								err = sys_dup2(tf->tf_a0, tf->tf_a1);
 
                 break;
 
