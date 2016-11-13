@@ -243,7 +243,7 @@ sys_close(int fd)
         kfree(file->fVnode);
         kfree(ft->tOpenfiles[fd]);
     }
-    ft->t_fileTable[fd] = NULL;
+    ft->tOpenfiles[fd] = NULL;
     lock_release(file->fLock);
     return 0;
 }
