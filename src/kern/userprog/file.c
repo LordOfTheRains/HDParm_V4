@@ -169,7 +169,7 @@ check_valid(int *fd) {
         return EBADF;
     }
     //check valid fileTable
-    if (curthread->t_fileTable == NULL || curthread->t_fileTable[fd]) {
+    if (curthread->t_fileTable == NULL) {
         return EBADF;
     }
     return 0;
