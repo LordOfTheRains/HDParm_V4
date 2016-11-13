@@ -87,7 +87,7 @@ sys_read(int fd, void *buf, size_t nbytes)
 {
     kprintf("inside read syscall\n");
     //Oh boi here we go
-    struct openFile file;
+    struct openFile *file;
     
     //check valid fd
     if (fd < 0) {
