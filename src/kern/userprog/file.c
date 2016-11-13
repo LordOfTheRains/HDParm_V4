@@ -161,7 +161,7 @@ sys_lseek(int fd,  off_t offset, int whence)
     kprintf("inside lseek syscall\n");
     int check = check_valid(fd); 
     if (check) {
-        kprintf("File invalid\n");
+        kprintf("File invalid. Error: %d\n", check);
         return check;
     }
     struct fileTable *ft = curthread->t_fileTable;
@@ -176,41 +176,49 @@ sys_lseek(int fd,  off_t offset, int whence)
     //switchy
     switch(whence) {
         case SEEK_SET:
+            kprintf("SEEK_SET\n");
             newOffset = offset;
             break;
 
         case SEEK_CUR:
+            kprintf("SEEK_CUR\n");
             newOffset = file->fOffset + offset;
             break;
 
         case SEEK_END:
+            kprintf("SEEK_END\n");
             //use VOP_STAT to get a stat struct for the file
             result = VOP_STAT(file->fVnode, &fileStat);
             //make sure everything is kosher
             if (result) {
+                kprintf("VOP_STAT call failed. Error: %d\n", result);
                 return result;
             }
             newOffset = fileStat.st_size + offset;
             break;
 
         default:
+            kprintf("whence defaulted\n");
             lock_release(file->fLock);
             return EINVAL;
     }
 
     //Make sure newOffset is legit
     if (newOffset < 0) {
+        kprintf("offset < 0\n");
         lock_release(file->fLock);
         return EINVAL;
     }
 
-    //Seek the stuff
+    //Seek enlightenment
     result = VOP_TRYSEEK(file->fVnode, newOffset);
     lock_release(file->fLock);
     //see if it worked
     if (result) {
+        kprintf("lseek failed. Error: %d", result);
         return result;
     }
+    kprintf("lseek worked, yay!\n");
     return newOffset;
 }
 
@@ -219,7 +227,24 @@ int
 sys_close(int fd)
 {
     kprintf("inside close syscall\n");
+    int check = check_valid(fd);
+    if (check) {
+        return result;
+    }
+    //GET DEM FILES 
+    struct fileTable *ft = curthread->t_fileTable;
+    struct openFile *file = ft->tOpenfiles[fd];
 
+    lock_acquire(file->fLock);
+    
+    vfs_close(file->fVnode);
+
+    if (file->fRefCount == 0) {
+        kfree(file->fVnode);
+        kfree(ft->tOpenfiles[fd]);
+    }
+    ft->t_fileTable[fd] = NULL;
+    lock_release(file->fLock);
     return 0;
 }
 
