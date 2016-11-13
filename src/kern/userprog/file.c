@@ -125,6 +125,7 @@ sys_write(int fd, const void *buf, size_t nbytes)
     kprintf("inside write syscall\n");
     int check = check_valid(fd); 
     if (check) {
+        kprintf("File invalid\n");
         return check;
     }
     struct openFile *file;
@@ -132,6 +133,7 @@ sys_write(int fd, const void *buf, size_t nbytes)
 
     file = ft->tOpenfiles[fd];
     if (file->fMode == O_RDONLY) {
+        kprintf("File can't be written\n");
         return EINVAL;
     }
     lock_acquire(file->fLock);
@@ -145,8 +147,10 @@ sys_write(int fd, const void *buf, size_t nbytes)
     kfree(buffer);
     lock_release(file->fLock);
     if (result) {
+        kprintf("file written successfully\n");
         return result;
     }
+    kprintf("file not written\n");
     return 0;
 }
 
@@ -155,7 +159,59 @@ int
 sys_lseek(int fd,  off_t offset, int whence)
 {
     kprintf("inside lseek syscall\n");
-    return 0;
+    int check = check_valid(fd); 
+    if (check) {
+        kprintf("File invalid\n");
+        return check;
+    }
+    struct fileTable *ft = curthread->t_fileTable;
+    struct openFile *file = ft->tOpenfiles[fd];
+
+    lock_acquire(file->fLock);
+
+    int newOffset;
+    int result;
+    struct stat fileStat;
+
+    //switchy
+    switch(whence) {
+        case SEEK_SET:
+            newOffset = offset;
+            break;
+
+        case SEEK_CUR:
+            newOffset = file->fOffset + offset;
+            break;
+
+        case SEEN_END:
+            //use VOP_STAT to get a stat struct for the file
+            result = VOP_STAT(file->fVnode, &fileStat);
+            //make sure everything is kosher
+            if (result) {
+                return result;
+            }
+            newOffset = fileStat.st_size + offset;
+            break;
+
+        default:
+            lock_release(file->fLock);
+            return EINVAL;
+    }
+
+    //Make sure newOffset is legit
+    if (newOffset < 0) {
+        lock_release(file->fLock);
+        return EINVAL;
+    }
+
+    //Seek the stuff
+    result = VOP_TRYSEEK(file->fVnode, newOffset);
+    lock_release(file->fLock);
+    //see if it worked
+    if (result) {
+        return result;
+    }
+    return newOffset;
 }
 
 
