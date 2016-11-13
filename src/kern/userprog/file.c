@@ -274,7 +274,7 @@ sys_dup2(int oldfd, int newfd)
     newFile->fOffset = oldFile->fOffset;
     newFile->fMode = oldFile->fMode;
     newFile->fLock = oldFile->fLock;
-    ft[newfd] = newFile;
+    ft->tOpenfiles[newfd] = newFile;
     kprintf("%d duped to %d\n", oldfd, newfd);
     lock_release(oldFile->fLock);
     return newfd;
