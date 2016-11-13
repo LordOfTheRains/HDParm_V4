@@ -183,7 +183,7 @@ sys_lseek(int fd,  off_t offset, int whence)
             newOffset = file->fOffset + offset;
             break;
 
-        case SEEN_END:
+        case SEEK_END:
             //use VOP_STAT to get a stat struct for the file
             result = VOP_STAT(file->fVnode, &fileStat);
             //make sure everything is kosher
