@@ -92,25 +92,18 @@ sys_read(int fd, void *buf, size_t nbytes)
     if (check) {
         return check;
     }
-    // //check valid fd
-    // if (fd < 0) {
-    //     return EBADF;
-    // }
+
     struct fileTable *ft = curthread->t_fileTable;
-    // //check valid fileTable
-    // if (ft == NULL) {
-    //     return EBADF;
-    // }
+
     file = ft->tOpenfiles[fd];
     //Check if file can be read
-    if (file->fMode == O_RDONLY || file->fMode == O_RDWR) {
+    if (file->fMode == O_WRONLY) {
         return EINVAL;
     }
     lock_acquire(file->fLock);
 
     //Get a read uio
     struct uio readUio;
-    // struct iovec readIovec;
     char *buffer = (char*)kmalloc(nbytes);
     mk_kuio(&readUio, (void*)buffer, nbytes, file->fOffset, UIO_READ);
 
@@ -133,6 +126,26 @@ sys_write(int fd, const void *buf, size_t nbytes)
     int check = check_valid(fd); 
     if (check) {
         return check;
+    }
+
+    struct fileTable *ft = curthread->t_fileTable;
+
+    file = ft->tOpenfiles[fd];
+    if (file->fMode == O_RDONLY) {
+        return EINVAL;
+    }
+    lock_acquire(file->fLock);
+
+    struct uio writeUio;
+    char *buffer = (char*)kmalloc(nbytes);
+    mk_kuio(&writeUio, (void*)buffer, nbytes, file->fOffset, UIO_WRITE);
+
+    int result = VOP_WRITE(file->fVnode, &writeUio);
+    file->fOffset = writeUio.uio_offset;
+    kfree(buffer);
+    lock_release(file->fLock);
+    if (result) {
+        return result;
     }
     return 0;
 }
