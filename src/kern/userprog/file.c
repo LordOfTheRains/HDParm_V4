@@ -88,16 +88,19 @@ sys_read(int fd, void *buf, size_t nbytes)
     kprintf("inside read syscall\n");
     //Oh boi here we go
     struct openFile *file;
-    
-    //check valid fd
-    if (fd < 0) {
-        return EBADF;
+    int check = check_valid(fd); 
+    if (check) {
+        return check;
     }
+    // //check valid fd
+    // if (fd < 0) {
+    //     return EBADF;
+    // }
     struct fileTable *ft = curthread->t_fileTable;
-    //check valid fileTable
-    if (ft == NULL) {
-        return EBADF;
-    }
+    // //check valid fileTable
+    // if (ft == NULL) {
+    //     return EBADF;
+    // }
     file = ft->tOpenfiles[fd];
     //Check if file can be read
     if (file->fMode == O_RDONLY || file->fMode == O_RDWR) {
@@ -127,6 +130,10 @@ int
 sys_write(int fd, const void *buf, size_t nbytes)
 {
     kprintf("inside write syscall\n");
+    int check = check_valid(fd); 
+    if (check) {
+        return check;
+    }
     return 0;
 }
 
@@ -152,5 +159,18 @@ int
 sys_dup2(int oldfd, int newfd)
 {
     kprintf("inside dup2 syscall\n");
+    return 0;
+}
+
+int
+check_valid(int *fd) {
+    //check valid fd
+    if (fd < 0) {
+        return EBADF;
+    }
+    //check valid fileTable
+    if (ft == NULL || curthread->t_fileTable[fd]) {
+        return EBADF;
+    }
     return 0;
 }
