@@ -109,10 +109,10 @@ sys_read(int fd, void *buf, size_t nbytes)
     struct uio readUio;
     // struct iovec readIovec;
     char *buffer = (char*)kmalloc(nbytes);
-    mk_kuio(&readUio, (void*)buffer, nbytes, file->offset, UIO_READ);
+    mk_kuio(&readUio, (void*)buffer, nbytes, file->fOffset, UIO_READ);
 
-    int result = VOP_READ(file->vnode, &readUio);
-    file->offset = readUio.uio_offset;
+    int result = VOP_READ(file->fVnode, &readUio);
+    file->fOffset = readUio.uio_offset;
     kfree(buffer);
     lock_release(file->fLock);
     //See if the read worked
