@@ -63,6 +63,7 @@ sys_open(const char *path, int oflag, int mode)
             ft->tOpenfiles[i] = file;
             fileDescriptor = i;
             added = true;
+            kprintf("File added to table :D ")
         }
     }
 
@@ -74,6 +75,7 @@ sys_open(const char *path, int oflag, int mode)
         vfs_close(vn);
         return 0;
     } else {
+        kprintf("File table is FULL :(")
         return EMFILE;
     }
 
@@ -84,6 +86,39 @@ int
 sys_read(int fd, void *buf, size_t nbytes)
 {
     kprintf("inside read syscall\n");
+    //Oh boi here we go
+    
+    
+    //check valid fd
+    if (fd < 0) {
+        return EBADF;
+    }
+    struct fileTable *ft = curthread->t_fileTable;
+    //check valid fileTable
+    if (ft == NULL) {
+        return EBADF;
+    }
+    file = ft->tOpenfiles[fd];
+    //Check if file can be read
+    if (file->fMode == O_RDONLY || file->fMode == O_RDWR) {
+        return EINVAL;
+    }
+    lock_acquire(file->fLock);
+
+    //Get a read uio
+    struct uio readUio;
+    // struct iovec readIovec;
+    char *buffer = (char*)kmalloc(nbytes);
+    mk_kuio(&readUio, (void*)buffer, nbytes, file->offset, UIO_READ);
+
+    int result = VOP_READ(file->vnode, &readUio);
+    file->offset = readUio.uio_offset;
+    kfree(buffer);
+    lock_release(file->fLock);
+    //See if the read worked
+    if(result) {
+        return result;
+    }
     return 0;
 }
 
@@ -108,6 +143,7 @@ int
 sys_close(int fd)
 {
     kprintf("inside close syscall\n");
+
     return 0;
 }
 
