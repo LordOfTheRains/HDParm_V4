@@ -63,7 +63,7 @@ sys_open(const char *path, int oflag, int mode)
             ft->tOpenfiles[i] = file;
             fileDescriptor = i;
             added = true;
-            kprintf("File added to table :D ")
+            kprintf("File added to table :D ");
         }
     }
 
@@ -75,7 +75,7 @@ sys_open(const char *path, int oflag, int mode)
         vfs_close(vn);
         return 0;
     } else {
-        kprintf("File table is FULL :(")
+        kprintf("File table is FULL :(");
         return EMFILE;
     }
 
@@ -87,7 +87,7 @@ sys_read(int fd, void *buf, size_t nbytes)
 {
     kprintf("inside read syscall\n");
     //Oh boi here we go
-    
+    struct openFile file;
     
     //check valid fd
     if (fd < 0) {
