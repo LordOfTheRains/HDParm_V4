@@ -251,7 +251,7 @@ int
 sys_dup2(int oldfd, int newfd)
 {
     kprintf("inside dup2 syscall\n");
-    int check = check_valid(fd);
+    int check = check_valid(oldfd);
     if (check) {
         return check;
     }
