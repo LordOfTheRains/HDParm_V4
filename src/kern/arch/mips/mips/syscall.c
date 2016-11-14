@@ -49,6 +49,7 @@
 void
 mips_syscall(struct trapframe *tf)
 {
+	kprintf("inside mips_syscall");
 	int callno;
 	int32_t retval;
 	int err;
