@@ -15,7 +15,7 @@
 #include <kern/stat.h>
 //int sys_open(const char *path, int oflag, mode_t mode)
 int
-sys_open(const char *path, int oflag, int mode)
+sys_open(const char *path, int oflag, int mode, int *retval)
 {
     kprintf("inside open syscall\n");
 
@@ -40,6 +40,7 @@ sys_open(const char *path, int oflag, int mode)
     if (file->fLock==NULL ) {
         vfs_close(vn);
         kfree(file);
+        *retval = -1;
         return ENOMEM;
     }
 
@@ -73,9 +74,11 @@ sys_open(const char *path, int oflag, int mode)
         lock_destroy(file->fLock);
         kfree(file);
         vfs_close(vn);
+        *retval = 0;
         return 0;
     } else {
         kprintf("File table is FULL :(");
+        *retval = -1;
         return EMFILE;
     }
 
@@ -83,13 +86,14 @@ sys_open(const char *path, int oflag, int mode)
 
 
 int
-sys_read(int fd, void *buf, size_t nbytes)
+sys_read(int fd, void *buf, size_t nbytes, int *retval)
 {
     kprintf("inside read syscall\n");
     //Oh boi here we go
     struct openFile *file;
     int check = check_valid(fd); 
     if (check) {
+        *retval = -1;
         return check;
     }
 
@@ -98,6 +102,7 @@ sys_read(int fd, void *buf, size_t nbytes)
     file = ft->tOpenfiles[fd];
     //Check if file can be read
     if (file->fMode == O_WRONLY) {
+        *retval = -1;
         return EINVAL;
     }
     lock_acquire(file->fLock);
@@ -113,18 +118,21 @@ sys_read(int fd, void *buf, size_t nbytes)
     lock_release(file->fLock);
     //See if the read worked
     if(result) {
+        *retval = -1;
         return result;
     }
+    *retval = nbytes - readUio.uio_resid;
     return 0;
 }
 
 
 int
-sys_write(int fd, const void *buf, size_t nbytes)
+sys_write(int fd, const void *buf, size_t nbytes, int *retval)
 {
     kprintf("inside write syscall\n");
     int check = check_valid(fd); 
     if (check) {
+        *retval = -1;
         return check;
     }
     struct openFile *file;
@@ -133,6 +141,7 @@ sys_write(int fd, const void *buf, size_t nbytes)
     file = ft->tOpenfiles[fd];
     if (file->fMode == O_RDONLY) {
         kprintf("File can't be written\n");
+        *retval = -1;
         return EINVAL;
     }
     lock_acquire(file->fLock);
@@ -146,20 +155,23 @@ sys_write(int fd, const void *buf, size_t nbytes)
     kfree(buffer);
     lock_release(file->fLock);
     if (result) {
-        kprintf("file written successfully\n");
+        kprintf("file not written\n");
+        *retval = -1;
         return result;
     }
-    kprintf("file not written\n");
+    kprintf("file written successfully\n");
+    *retval = nbytes - writeUio.uio_resid;
     return 0;
 }
 
 
 int
-sys_lseek(int fd,  off_t offset, int whence)
+sys_lseek(int fd,  off_t offset, int whence, int *retval)
 {
     kprintf("inside lseek syscall\n");
     int check = check_valid(fd); 
     if (check) {
+        *retval = -1;
         return check;
     }
     struct fileTable *ft = curthread->t_fileTable;
@@ -190,6 +202,7 @@ sys_lseek(int fd,  off_t offset, int whence)
             //make sure everything is kosher
             if (result) {
                 kprintf("VOP_STAT call failed. Error: %d\n", result);
+                *retval = -1;
                 return result;
             }
             newOffset = fileStat.st_size + offset;
@@ -205,6 +218,7 @@ sys_lseek(int fd,  off_t offset, int whence)
     if (newOffset < 0) {
         kprintf("offset < 0\n");
         lock_release(file->fLock);
+        *retval = -1;
         return EINVAL;
     }
 
@@ -214,19 +228,22 @@ sys_lseek(int fd,  off_t offset, int whence)
     //see if it worked
     if (result) {
         kprintf("lseek failed. Error: %d", result);
+        *retval = -1;
         return result;
     }
     kprintf("lseek worked, yay!\n");
-    return newOffset;
+    *retval = newOffset;
+    return 0;
 }
 
 
 int
-sys_close(int fd)
+sys_close(int fd, int *retval)
 {
     kprintf("inside close syscall\n");
     int check = check_valid(fd);
     if (check) {
+        *retval = -1;
         return check;
     }
     //GET DEM FILES 
@@ -243,16 +260,18 @@ sys_close(int fd)
     }
     ft->tOpenfiles[fd] = NULL;
     lock_release(file->fLock);
+    *retval = 0;
     return 0;
 }
 
 
 int
-sys_dup2(int oldfd, int newfd)
+sys_dup2(int oldfd, int newfd, int *retval)
 {
     kprintf("inside dup2 syscall\n");
     int check = check_valid(oldfd);
     if (check) {
+        *retval = -1;
         return check;
     }
 
@@ -260,6 +279,7 @@ sys_dup2(int oldfd, int newfd)
     //make sure newfd is valid
     if (newfd > MAX_OPEN_FILES || ft->tOpenfiles[newfd] != NULL){
         kprintf("newfd %d is not a valid descriptor\n", newfd);
+        *retval = -1;
         return EBADF;
     }
     
@@ -269,7 +289,7 @@ sys_dup2(int oldfd, int newfd)
 
     lock_acquire(oldFile->fLock);
 
-    //copy dat metadata
+    //HERE COM DAT METADATA
     newFile->fVnode = oldFile->fVnode;
     newFile->fOffset = oldFile->fOffset;
     newFile->fMode = oldFile->fMode;
@@ -277,7 +297,8 @@ sys_dup2(int oldfd, int newfd)
     ft->tOpenfiles[newfd] = newFile;
     kprintf("%d duped to %d\n", oldfd, newfd);
     lock_release(oldFile->fLock);
-    return newfd;
+    *retval = newfd;
+    return 0;
 }
 
 int
