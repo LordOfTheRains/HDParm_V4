@@ -96,26 +96,23 @@ mips_syscall(struct trapframe *tf)
 
 	    case SYS__exit:
 								kprintf("inside exit");
-                //err = sys__exit(&retval);
-                err = sys_fork();
+                err = sys__exit(tf->tf_a0);
                 break;
 
 	    case SYS_execv:
 		  				kprintf("inside execv");
-                // err = sys_execv(&retval);
-								err = sys_fork();
+                err = sys_execv((const char*))tf->tf_a0, (char **)tf->tf_a1);
 
                 break;
 
 	    case SYS_fork:
 								kprintf("inside fork");
-                err = sys_fork();
+                err = sys_fork(tf, &retvsl);
                 break;
 
 	    case SYS_waitpid:
 								kprintf("inside waitpid");
-                // err = sys_waitpid(&retval);
-								err = sys_fork();
+                err = sys_waitpid((pid_t)tf->tf_a0, (char **)tf->tf_a1);
 
                 break;
 
@@ -198,22 +195,15 @@ mips_syscall(struct trapframe *tf)
 	assert(curspl==0);
 }
 
-// void
-// md_forkentry(void *tf, unsigned long addr)
-// {
+void
+md_forkentry(struct trapframe *tf)
+{
 	/*
 	 * This function is provided as a reminder. You need to write
 	 * both it and the code that calls it.
 	 *
 	 * Thus, you can trash it and do things another way if you prefer.
 	 */
-	//  (void)useless;
-	//  struct trapframe new_tf = ((void **)arg1)[0];
-	//  struct addrspace new_addr = ((void **)arg1)[1];
+ 	(void)tf;
 
-
-
-	//  as_activate(new_addr);
-
-
-// }
+}

@@ -99,6 +99,6 @@ void pid_destroy (pid_t pid) {
 }
 
 
-void get_pidinfo(pid_t pid){
+static struct pidinfo* get_pidinfo(pid_t pid){
   return pidinfo[pid];
 }
