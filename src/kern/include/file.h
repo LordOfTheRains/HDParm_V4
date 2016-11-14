@@ -16,7 +16,7 @@
 #include <thread.h>
 #include <kern/stat.h>
 
-#define MAX_OPEN_FILES 1
+#define MAX_OPEN_FILES 20
 /*
 * I'm used to boolean variables and when I don't have them
 * I feel lost and confused. So I made my own.

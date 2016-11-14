@@ -1,0 +1,364 @@
+Source code can be found here: https://github.com/LordOfTheRains/HDParm_V4
+
+File System Calls:
+Everything specified in this section was implemented by Curtis Hammons. 
+
+General approach:
+    All the functions here revolve around the manipulation of two main structs 
+we define: __openFile__ which is a representation of a file that has been 
+opened by the system, and __fileTable__ which contains a list of all files 
+that are currently opened by the system. These will be described in greater 
+detail below.
+
+    Many of these functions are little more than utilities for lower level 
+functions. For example, sys_read acts as a utility for VOP_READ in 
+that it's main purpose is to provide the parameters needed for it and for 
+handling the result that it returns. 
+
+
+
+    sys_read and sys_write. We saw fit to put these lines into a helper 
+function in order to make implementing these functions simpler and to 
+reduce verbosity of the code. More detailed information about helper 
+functions if provided below. 
+
+                        Structures:
+
+We use two main structs: openFile and Filetable.
+
+openFile: Structure to hold the metadata of a file that is
+ currently open.
+Fields:
+- fVnode: vnode that holds a file's basic info
+- fLock: lock.
+- fMode: file accessor mode 
+- fRefCount: amount of directories the file appears in
+- Offset: offset of the file
+
+fileTable: Structure that holds a list of all currently open files.
+Fields
+- tOpenfiles: list of currently open files. It's size is set to the 
+value of the constant MAX_OPEN_FILES defined in file.h
+
+                        Helper Functions
+
+check_valid
+
+This function takes a file descriptor and makes sure the file exists and 
+that it is contained in the table. Returns 0 if successful. If not, it 
+returns the error code (which in this case is always EBADF).
+
+check_valid(int *fd) {
+    //Make sure fd is valid
+    if (fd < 0)
+        return EBADF
+    
+    //Check if file is in file table
+    if (filetable[fd] == NULL)
+        return EBADF
+
+    return 0
+}
+
+                        Call Functions
+
+sys_open
+
+    The procedure will follow the guidelines given in the lecture
+slides. We create a new openFile struct to represent the new file 
+then add it to the table of open files. 
+
+Pseudocode:
+
+sys_open(const char *path, int oflag, int mode)
+{
+	struct vnode *vn
+	struct openfile file
+
+	//use vfs_open to check for errors
+	int err
+	err = vfs_open(path, oflag, mode, &vn)
+	
+    //Return if vfs_open found errors
+	if (err) 
+        return err
+        
+    init file here
+    
+    if (fileTable has room)
+        add file to file table
+        return 0
+    else
+        return EMFILE
+}
+
+sys_read
+
+    This will follow the guidelines given in the lecture slides. 
+We provide VOP\_READ with the parameters it needs and handle
+the result. If the read is successful, the number of bytes read is returned. 
+
+Pseudocode:
+
+sys_read(int fd, void *buf, size_t nbytes) {
+    struct uio readUio
+    openFile file
+    
+    //Check if valid file
+    check = check_valid(fd)
+    if (check) 
+        return check
+    
+    //use VOP_READ to read the file
+    int result = VOP_READ(file->vnode, &readUio)
+    //see if it worked
+    if (result)
+        return result
+    else
+        return 0
+}
+
+sys_write
+
+    Writes bytes to a file. If the write is successful, the number
+of bytes written is returned. 
+
+The general approach is to act as a utility for VOP_WRITE. That is, 
+provide the parameters that VOP_WRITE needs (a vnode and a uio)
+ and then handle the output of it. 
+
+psuedocode:
+
+sys_write(int fd, const void *buf, size_t nbytes){
+    
+    check = check_valid(fd)
+    if (check)
+        return check
+    
+    file = fileTable[fd]
+    struct uio writeuio
+    result = VOP_WRITE(file->vnode, &writeuio)
+    
+    //see if write worked
+    if (result)
+        return result
+    else
+        return 0
+    
+}
+
+
+sys_lseek
+
+This function changes the current position in a given file. 
+
+    The approach is to act as a utility for VOP_TRYSEEK. That is, 
+provide parameters and handle the results. We require a switch statement 
+revolving around the variable __whence__ that determines what kind of 
+repositioning we are doing. This switch statment will adjust the newOffset 
+variable to the new location that we will seek to. 
+
+pseudocode:
+
+sys_lseek(int fd, off_t offset, int whence) {
+    //check file validity
+    check = check_valid(fd)
+    if (check)
+        return check
+    
+    file = fileTable[fd]
+    
+    acquire_lock
+    
+    int newOffset
+    int result
+    struct stat fileStat
+    
+    //adjust newOffset depending on whence
+    switch(whence)
+        case SEEK_SET:
+            newOffset = offset
+            break
+        case SEEK_CUR:
+            newOffset = file->fOffset + offset
+            break
+        
+        case SEEK_END:
+            result = VOP_STAT(file->vnode, fileStat)
+            if (result)
+                return result
+            newOffset =  fileStat.size + offset
+            break;
+        default:
+            release_lock
+            return EINVAL
+    
+    if (newOffset < 0)
+        lock_release
+        return EINVAL
+    
+    //try the seek
+    result = VOP_TRYSEEK(file->fVnode, newOffset)
+    lock_release
+    //see if it worked
+    if (result)
+        return result
+    retval = newOffset
+    return 0
+}
+
+sys_close
+
+    We follow the same procedure given in the lecture slides. Close the file, 
+and if there are no more references to it we remove it from the file table. 
+
+Pseudocode:
+
+sys_close(int fd) {
+    //check file validity
+    check = check_valid(fd)
+    if (check)
+        return check
+    
+    file = fileTable[fd]
+    
+    lock_acquire
+    
+    //close the file
+    vfs_close(file->fVnode)
+    
+    //check if last instance
+    if (file->fRefCount == 0)
+        kfree(file->fVnode)
+        kfree(ft->tOpenfiles[fd]
+    
+    //remove from table
+    ft->t_fileTable[fd] = NULL
+    
+    lock_release
+    return 0
+}
+
+sys_dup2
+
+    Duplicate a file. Our approach is to find the file to be duplicated in the 
+file table, copy it's metadata to a new file, then place that new file in the 
+table at the given newfd index parameter. If successful, newfd is returned.  
+
+Pseudocode:
+
+sys_dup2(int oldfd, int newfd) {
+    //check file validity
+    check = check_valid(fd)
+    if (check)
+        return check
+        
+    //make sure newfd is a valid descriptor
+    if (newfd > MAX_OPEN_FILES || fileTable[newfd != NUL)
+        return EBADF
+    
+    oldFile = fileTable[oldfd]
+    openFile newFile
+    lock_acquire
+    
+    //copy metadata
+    newFile->fVnode = oldFile->fVnode
+    newFile->fOffset = oldFile->fOffset
+    newFile->fMode = oldFile->fMode
+    newFile->fLock = oldFile->fLock
+    fileTable[newfd] = newFile
+    
+    lock_release
+    return 0
+}
+
+Process System Calls:
+All these were done by Rain Li
+
+**current implementation status**
+for process related syscalls
+- can't compile everything yet due to syntax and dereferencing errors;
+
+* int sys_getpid; //done
+* int sys_fork//done, untested
+* int sys_execv//not started
+* int sys_waitpid//not started
+* int sys_exit//done, untested
+**High level design**
+so the overview is basiacally i need a mechanism to manage all the pids and 
+threads can be managed using these pid information. for pid management, the 
+major component is synchronization, since pids are recycled i would have 
+to carefully manage the state the pids and lock them accordingly to avoid
+ crazy things from happening when multple process try to change or read the 
+ state.  the current pid generation mechanism does not scale well but it was
+  the easiest solution that came to my mind. pid status are the most improtant
+  thing since thats what threads use to not only manage synchronization but 
+  also prevent deadlock (parent wait on child and child wait on parent...) 
+  by putting restriction on these waits based on the parent child relationship
+   betweent the processes. 
+
+side note: having my pdi management file separte form the sysystem calls definitely
+helepd with code organization, i was trying to go modular so the code base ended
+up to be lot bigger than i had expected and some functionalities are not even included....
+
+
+**Detail Design**
+
+## pid management system ##
+I created a pid_factory file to organize all the pid related functions.
+each pid is assigned a pidinfo that keeps track of pid status, for example, the
+exit_status and exited properties are used to track if the pid can be reclaimed
+and let whoever is waiting on this pid know about the exit status. each pid also
+keeps track of parent pid so parent can be notify if the child pid exited or
+whatever else happens.
+
+the pid generation system is not fully impleemnted, the basic idea here is to
+have a table of pids and each entry is a pidinfo. get_available_pid should go throught
+ he list and find out whats exited and return that so the requesting pid can be granted.
+  get_pidinfo can be called to check the status of each pid.
+
+there are multiple locks in the file to lock all the shared resources such the total pid
+ count and the pidinfo table. the purpose of this is to provide new pid for new process
+  and lets process /parent process access and management necessary pids. majority of the
+   funcitons are implemented but not tested or able to compile due to other errors in other
+    files. but the logic should be clearn the funciton body.
+
+## sys_fork ##
+
+the design for sysfork is basically copy necessary info from calling process and make a copy
+child process. the main mechanism to create a new process is using the thread_fork fucntion,
+i was originally going to use md_forkentry then i realize the arguiements would nto let me
+pass this fucntion directly into thread_fork, but i didnt want to modify trapframe.h. so
+i made a new function called goto_new_process that conforms to the function signature of
+thread_fork and takes the new thread trapframe/addrspace to and calls mips_usermode to
+start the function on a child process. then at the end of it i set the retval to pid
+so parent can have childs pid and returs 0 to the child indicating fork success. again, 
+it is fully implemented but not tested.
+
+
+## sys_execv ##
+honestly i have no idea how to approach this at all...
+## sys_waitpid ##
+
+so the strategy here is basically check the exited value and the exit_status of the pid 
+info of the wpid and return accordingly. im panicing the thread if the pid doesnt exist 
+since im not sure what error code should be returned.
+
+the man page is confusing for this one because it says return the exit status of the wpid 
+if it has already exited then later in the page it says to return the pid of the the process 
+matching the status arguement.... anways i went with the first approach where if the pid they 
+requested is exited, i return the exit status. else -1. i
+
+## sys_exit ##
+
+so this fucntion basically exit the thread, im utilizing the thread_exit functiont to exit the
+process, but since i have pid info i had change status on the thread so that the pid can be 
+recycle and whoever is waiting on the pid can get the  correct status codes and do necessary things.
+
+
+Afterthoughts
+    Due to constraints on time and manpower(only having a two person group for a 
+three person project) we weren't able to effectively implement and test much 
+that we planned to. Our file calls have all been written to the specs given 
+above, but we were unable to confirm they worked due to issues with os161 
+that we were unable to overcome. 
