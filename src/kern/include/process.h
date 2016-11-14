@@ -7,7 +7,7 @@
 
 int sys_getpid(pid_t *retval);
 
-int sys_fork();
+int sys_fork(struct trapframe *parent_tf, int *retval);
 
 int sys_execv(const char *path, const char *argv[]);
 
@@ -16,6 +16,3 @@ int sys_waitpid(pid_t wpid, int *status, int options);
 int sys_exit();
 
 #endif /* _PROCESS_H_ */
-
-
-

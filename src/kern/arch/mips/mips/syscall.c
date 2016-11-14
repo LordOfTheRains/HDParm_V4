@@ -49,6 +49,7 @@
 void
 mips_syscall(struct trapframe *tf)
 {
+	kprintf("inside mips_syscall");
 	int callno;
 	int32_t retval;
 	int err;
@@ -95,54 +96,51 @@ mips_syscall(struct trapframe *tf)
 
 	    case SYS__exit:
 								kprintf("inside exit");
-                //err = sys__exit(&retval);
-                err = sys_fork();
+                err = sys__exit(tf->tf_a0);
                 break;
 
 	    case SYS_execv:
 		  				kprintf("inside execv");
-                // err = sys_execv(&retval);
-								err = sys_fork();
+                err = sys_execv((const char*))tf->tf_a0, (char **)tf->tf_a1);
 
                 break;
 
 	    case SYS_fork:
 								kprintf("inside fork");
-                err = sys_fork();
+                err = sys_fork(tf, &retvsl);
                 break;
 
 	    case SYS_waitpid:
 								kprintf("inside waitpid");
-                // err = sys_waitpid(&retval);
-								err = sys_fork();
+                err = sys_waitpid((pid_t)tf->tf_a0, (char **)tf->tf_a1);
 
                 break;
 
 	     case SYS_open:
 			 					kprintf("inside open");
                 // err = sys_open(const char *path, int oflag, mode_t mode);
-								err = sys_fork();
+								err = sys_open(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_read:
 								kprintf("inside read");
                 // err = sys_read(&retval);
-								err = sys_fork();
+								err = sys_read(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_write:
 								kprintf("inside write");
                 // err = sys_write(&retval);
-								err = sys_fork();
+								err = sys_write(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_close:
 								kprintf("inside close");
                 // err = sys_close(&retval);
-								err = sys_fork();
+								err = sys_close(tf->tf_a0);
 
                 break;
 				case SYS_getpid:
@@ -153,14 +151,14 @@ mips_syscall(struct trapframe *tf)
 	      case SYS_lseek:
 								kprintf("inside lseek");
                 // err = sys_lseek(&retval);
-								err = sys_fork();
+								err = sys_lseek(tf->tf_a0, tf->tf_a1, tf->tf_a2);
 
                 break;
 
 	    case SYS_dup2:
 								kprintf("inside dup2");
                 // err = sys_dup2(&retval);
-								err = sys_fork();
+								err = sys_dup2(tf->tf_a0, tf->tf_a1);
 
                 break;
 
@@ -206,6 +204,6 @@ md_forkentry(struct trapframe *tf)
 	 *
 	 * Thus, you can trash it and do things another way if you prefer.
 	 */
+ 	(void)tf;
 
-	(void)tf;
 }
