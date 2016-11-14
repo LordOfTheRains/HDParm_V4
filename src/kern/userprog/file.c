@@ -146,10 +146,10 @@ sys_write(int fd, const void *buf, size_t nbytes)
     kfree(buffer);
     lock_release(file->fLock);
     if (result) {
-        kprintf("file written successfully\n");
+        kprintf("file not written\n");
         return result;
     }
-    kprintf("file not written\n");
+    kprintf("file written successfully\n");
     return 0;
 }
 

@@ -7,8 +7,13 @@ for process related syscalls
 * int sys_execv//not started
 * int sys_waitpid//not started
 * int sys_exit//done, untested
+**High level design**
+so the overview is basiacally i need a mechanism to manage all the pids and threads can be managed using these pid information. for pid management, the major component is synchronization, since pids are recycled i would have to carefully manage the state the pids and lock them accordingly to avoid crazy things from happening when multple process try to change or read the state.  the current pid generation mechanism does not scale well but it was the easiest solution that came to my mind. pid status are the most improtant thing since thats what threads use to not only manage synchronization but also prevent deadlock (parent wait on child and child wait on parent...) by putting restriction on these waits based on the parent child relationship betweent the processes. 
 
-**Design**
+side note: having my pdi management file separte form the sysystem calls definitely helepd with code organization, i was trying to go modular so the code base ended up to be lot bigger than i had expected and some functionalities are not even included....
+
+
+**Detail Design**
 
 ## pid management system ##
 I created a pid_factory file to organize all the pid related functions.
