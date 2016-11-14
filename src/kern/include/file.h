@@ -45,20 +45,17 @@ struct openFile {
 struct fileTable {
   struct openFile *tOpenfiles[MAX_OPEN_FILES];
 };
-/* File syscalls */
-int sys_open(const char *path, int oflag, int mode, &retval);
 
-int sys_read(int fd, void *buf, size_t nbytes, &retval);
+int sys_open(const char *path, int oflag, int mode);
 
-int sys_write(int fd, const void *buf, size_t nbytes, &retval);
+int sys_read(int fd, void *buf, size_t nbytes);
 
-int sys_lseek(int fd,  off_t offset, int whence, &retval);
+int sys_write(int fd, const void *buf, size_t nbytes);
 
-int sys_close(int fd, &retval);
+int sys_lseek(int fd,  off_t offset, int whence);
 
-int sys_dup2(int oldfd, int newfd, &retval);
+int sys_close(int fd);
 
-/* other functions*/
-int check_valid(int *fd);
+int sys_dup2(int oldfd, int newfd);
 
 #endif /* FILE */
